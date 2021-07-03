@@ -1,0 +1,111 @@
+#![warn(clippy::nursery, clippy::pedantic)]
+use linux_commands_rewritten_in_rust::strftime::format_timestamp_with_nanosecond;
+
+fn main() {
+    let args = std::env::args().collect::<Vec<_>>();
+    if args.len() != 2 {
+        eprintln!("stat: missing operand");
+        eprintln!("Try 'stat --help' for more information.");
+        return;
+    }
+    match args[1].as_str() {
+        "--version" => {
+            println!("stat (GNU coreutils) rewritten in Rust");
+            println!("source code: https://github.com/pymongo/linux_commands_rewritten_in_rust");
+            return;
+        }
+        "--help" => {
+            println!("help doc is TODO");
+            return;
+        }
+        filename => {
+            my_stat(filename);
+        }
+    }
+}
+
+fn my_stat(filename: &str) {
+    let filename_with_nul = format!("{}\0", filename);
+    let mut file_stat = unsafe { std::mem::zeroed::<libc::stat>() };
+    let ret = unsafe {
+        libc::stat(
+            filename_with_nul.as_ptr().cast(),
+            (&mut file_stat) as *mut _,
+        )
+    };
+    if ret == -1 {
+        panic!("{:?}", std::io::Error::last_os_error());
+    }
+    println!("  File: {}", filename);
+    println!(
+        "  Size: {:<15} Blocks: {:<10} IO Block: {:<6} {}",
+        file_stat.st_size,
+        file_stat.st_blocks,
+        file_stat.st_blksize,
+        get_filetype(file_stat.st_mode)
+    );
+    println!("Device: ");
+    println!("Access: ");
+
+    let access_time = format_timestamp_with_nanosecond(file_stat.st_atime, file_stat.st_atime_nsec);
+    let modify_time = format_timestamp_with_nanosecond(file_stat.st_mtime, file_stat.st_mtime_nsec);
+    println!("Access: {}", access_time);
+    println!("Modify: {}", modify_time);
+    println!("Change: {}", modify_time);
+    println!(" Birth: {}", access_time);
+}
+
+
+/**
+| stat.h   | file_type        | $LS_COLORS | test  | find -type | example                     | 
+|----------|------------------|------------|-------|------------|-----------------------------| 
+| S_IFIFO  | FIFO(pipe)       | amber      | -p    | p          | /run/systemd/sessions/1.ref | 
+| S_IFCHR  | character device | yellow     | -c    | c          | /dev/console                | 
+| S_IFDIR  | directory        | purple     | -d    | d          | /usr/bin/                   | 
+| S_IFBLK  | block device     | yellow     | -b    | b          | /dev/nvme0n1p2              | 
+| S_IFREG  | regular file     | white      | -f    | f          | /usr/include/stdio.h        | 
+| S_IFLNK  | symbolic link    | aqua       | -L/-h | l          | /usr/lib/libcurl.so         | 
+| S_IFSOCK | socket           | magenta    | -S    | s          | /tmp/mongodb-27017.sock     | 
+
+```csv
+stat.h,file_type,$LS_COLORS,test,find -type,example
+S_IFIFO,FIFO(pipe),amber,-p,p,/run/systemd/sessions/1.ref
+S_IFCHR,character device,yellow,-c,c,/dev/console
+S_IFDIR,directory,purple,-d,d,/usr/bin/
+S_IFBLK,block device,yellow,-b,b,/dev/nvme0n1p2
+S_IFREG,regular file,white,-f,f,/usr/include/stdio.h
+S_IFLNK,symbolic link,aqua,-L/-h,l,/usr/lib/libcurl.so
+S_IFSOCK,socket,magenta,-S,s,/tmp/mongodb-27017.sock
+```
+
+- 串行读写设备示例: 磁带，键盘
+- 块状读写设备示例: DVD/CD, HDD 都是一次读写一个扇区
+*/
+fn get_filetype<'a>(st_mode: u32) -> &'a str {
+    let filetype_mask = st_mode & libc::S_IFMT;
+    match filetype_mask {
+        libc::S_IFIFO => "FIFO",
+        libc::S_IFCHR => "character device",
+        libc::S_IFDIR => "directory",
+        libc::S_IFBLK => "block device",
+        libc::S_IFREG => "regular file",
+        libc::S_IFLNK => "symbolic link",
+        libc::S_IFSOCK => "socket",
+        _ => unreachable!(),
+    }
+}
+
+#[test]
+fn test_stat_st_mode_bit_mask() {
+    // 1000 000 110100100
+    // kind     permission
+    println!("{:016b}", libc::S_IFMT);
+
+    println!("{:016b}", libc::S_ISUID);
+    println!("{:016b}", libc::S_ISGID);
+    println!("{:016b}", libc::S_ISVTX);
+
+    println!("{:016b}", libc::S_IRWXU);
+    println!("{:016b}", libc::S_IRWXG);
+    println!("{:016b}", libc::S_IRWXO);
+}
