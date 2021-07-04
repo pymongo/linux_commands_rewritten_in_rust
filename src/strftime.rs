@@ -97,8 +97,11 @@ pub fn format_timestamp_with_nanosecond(
 
 #[test]
 fn test_format_timestamp_with_nanosecond() {
-    const TEST_CASES: [(libc::time_t, libc::time_t, &str); 1] =
-        [(1_625_277_279, 444_706_875, "2021-07-03 09:54:39.444706875 +0800")];
+    const TEST_CASES: [(libc::time_t, libc::time_t, &str); 1] = [(
+        1_625_277_279,
+        444_706_875,
+        "2021-07-03 09:54:39.444706875 +0800",
+    )];
     for (timestamp, nanosecond, output) in TEST_CASES {
         assert_eq!(
             format_timestamp_with_nanosecond(timestamp, nanosecond),

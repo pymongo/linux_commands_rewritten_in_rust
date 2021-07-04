@@ -55,15 +55,15 @@ fn my_stat(filename: &str) {
 
 markdown table generate from csv by: https://donatstudios.com/CsvToMarkdownTable
 
-| stat.h   | file_type        | find -type/ls-l(first char) | bash test | example                     | $LS_COLORS | 
-|----------|------------------|-----------------------------|-----------|-----------------------------|------------| 
-| S_IFIFO  | FIFO(pipe)       | p                           | -p        | /run/systemd/sessions/1.ref | amber      | 
-| S_IFCHR  | character device | c                           | -c        | /dev/console                | yellow     | 
-| S_IFDIR  | directory        | d                           | -d        | /usr/bin/                   | purple     | 
-| S_IFBLK  | block device     | b                           | -b        | /dev/nvme0n1p2              | yellow     | 
-| S_IFREG  | regular file     | f/-                         | -f        | /usr/include/stdio.h        | white      | 
-| S_IFLNK  | symbolic link    | l                           | -L/-h     | /usr/lib/libcurl.so         | aqua       | 
-| S_IFSOCK | socket           | s                           | -S        | /tmp/mongodb-27017.sock     | magenta    | 
+| stat.h   | file_type        | find -type/ls-l(first char) | bash test | example                     | $LS_COLORS |
+|----------|------------------|-----------------------------|-----------|-----------------------------|------------|
+| S_IFIFO  | FIFO(pipe)       | p                           | -p        | /run/systemd/sessions/1.ref | amber      |
+| S_IFCHR  | character device | c                           | -c        | /dev/console                | yellow     |
+| S_IFDIR  | directory        | d                           | -d        | /usr/bin/                   | purple     |
+| S_IFBLK  | block device     | b                           | -b        | /dev/nvme0n1p2              | yellow     |
+| S_IFREG  | regular file     | f/-                         | -f        | /usr/include/stdio.h        | white      |
+| S_IFLNK  | symbolic link    | l                           | -L/-h     | /usr/lib/libcurl.so         | aqua       |
+| S_IFSOCK | socket           | s                           | -S        | /tmp/mongodb-27017.sock     | magenta    |
 
 ```csv
 stat.h,file_type,find -type/ls-l(first char),bash test,example,$LS_COLORS
