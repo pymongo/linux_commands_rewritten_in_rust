@@ -1,4 +1,6 @@
 /*!
+# id (GNU coreutils)
+
 ## How to get calling process uid/gid?
 libc::getuid() and libc::getgid()
 
@@ -24,12 +26,17 @@ fn main() {
     let passwd = unsafe { libc::getpwnam(username_with_nul.as_ptr()) };
     if passwd.is_null() {
         if last_errno() == 0 {
-            eprintln!("username({}) not found", username);
+            eprintln!("id: `{}`: no such user", username);
         } else {
             eprintln!("{}", last_errno_message());
         }
         return;
     }
     let passwd = unsafe { *passwd };
-    println!("uid={uid}({username}) gid={gid}({username})", uid=passwd.pw_uid, gid=passwd.pw_gid, username=username);
+    println!(
+        "uid={uid}({username}) gid={gid}({username})",
+        uid = passwd.pw_uid,
+        gid = passwd.pw_gid,
+        username = username
+    );
 }

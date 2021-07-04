@@ -47,7 +47,7 @@ https://man7.org/linux/man-pages/man3/errno.3.html
 
 ### EADDRINUSE 98 Address already in use
 */
-
+#[must_use]
 pub fn last_errno() -> i32 {
     // std::io::Error::last_os_error().raw_os_error().unwrap()
     unsafe { *libc::__errno_location() }
@@ -68,7 +68,6 @@ panic on strerror_r failed
 ## Errors
 Invalid errno input
 */
-#[allow(clippy::module_name_repetitions)]
 pub fn errno_err_msg(errno: i32) -> Result<String, std::io::ErrorKind> {
     const BUF_LEN: usize = 128;
     let mut buf = [0_u8; BUF_LEN];
@@ -78,7 +77,11 @@ pub fn errno_err_msg(errno: i32) -> Result<String, std::io::ErrorKind> {
         return Err(std::io::ErrorKind::InvalidInput);
     }
     assert_eq!(ret, 0);
-    let err_msg_buf_len = buf.iter().position(|&x| x == b'\0').unwrap();
+
+    // 标准库bytes转str是先通过libc::strlen得知bytes第一个nul_byte的索引
+    //let err_msg_buf_len = buf.iter().position(|&x| x == b'\0').unwrap();
+    let err_msg_buf_len = unsafe { libc::strlen(buf.as_ptr().cast()) };
+
     let err_msg = unsafe { String::from_utf8_unchecked(buf[..err_msg_buf_len].to_vec()) };
     Ok(err_msg)
 }

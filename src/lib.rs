@@ -43,6 +43,6 @@
 
 */
 #![warn(clippy::nursery, clippy::pedantic)]
-#![allow(clippy::doc_markdown)]
+#![allow(clippy::module_name_repetitions, clippy::doc_markdown)]
 pub mod errno;
 pub mod strftime;

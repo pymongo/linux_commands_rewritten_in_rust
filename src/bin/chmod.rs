@@ -1,3 +1,4 @@
+//! chmod (GNU coreutils)
 #![warn(clippy::nursery, clippy::pedantic)]
 
 use linux_commands_rewritten_in_rust::errno::last_errno_message;
@@ -5,7 +6,6 @@ use linux_commands_rewritten_in_rust::errno::last_errno_message;
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();
     if args.len() != 3 {
-        eprintln!("usage: chmod PERMISSION_BITS FILE");
         eprintln!("usage_example: chmod 777 main.rs");
         return;
     }
@@ -19,8 +19,8 @@ fn main() {
     assert!(other_permission <= 7);
 
     let permission = (user_permission << 6) | (group_permission << 3) | other_permission;
-    let filename = format!("{}\0", args[2]);
-    let ret = unsafe { libc::chmod(filename.as_ptr().cast(), permission) };
+    let filename = std::ffi::CString::new(args[2].as_bytes()).unwrap();
+    let ret = unsafe { libc::chmod(filename.as_ptr(), permission) };
     if ret == -1 {
         eprintln!("{}", last_errno_message());
     }
