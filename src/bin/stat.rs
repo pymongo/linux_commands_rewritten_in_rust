@@ -28,7 +28,7 @@ fn my_stat(filename: &str) {
     let mut file_stat = unsafe { std::mem::zeroed() };
     let ret = unsafe { libc::stat(filename_with_nul.as_ptr().cast(), &mut file_stat) };
     if ret == -1 {
-        panic!("{}", last_errno_message());
+        eprintln!("{}", last_errno_message());
     }
     println!("  File: {}", filename);
     println!(
@@ -52,25 +52,28 @@ fn my_stat(filename: &str) {
 
 /**
 ## 「重要」Unix文件类型
-| stat.h   | file_type        | $LS_COLORS | test  | find -type | example                     |
-|----------|------------------|------------|-------|------------|-----------------------------|
-| S_IFIFO  | FIFO(pipe)       | amber      | -p    | p          | /run/systemd/sessions/1.ref |
-| S_IFCHR  | character device | yellow     | -c    | c          | /dev/console                |
-| S_IFDIR  | directory        | purple     | -d    | d          | /usr/bin/                   |
-| S_IFBLK  | block device     | yellow     | -b    | b          | /dev/nvme0n1p2              |
-| S_IFREG  | regular file     | white      | -f    | f          | /usr/include/stdio.h        |
-| S_IFLNK  | symbolic link    | aqua       | -L/-h | l          | /usr/lib/libcurl.so         |
-| S_IFSOCK | socket           | magenta    | -S    | s          | /tmp/mongodb-27017.sock     |
+
+markdown table generate from csv by: https://donatstudios.com/CsvToMarkdownTable
+
+| stat.h   | file_type        | find -type/ls-l(first char) | bash test | example                     | $LS_COLORS | 
+|----------|------------------|-----------------------------|-----------|-----------------------------|------------| 
+| S_IFIFO  | FIFO(pipe)       | p                           | -p        | /run/systemd/sessions/1.ref | amber      | 
+| S_IFCHR  | character device | c                           | -c        | /dev/console                | yellow     | 
+| S_IFDIR  | directory        | d                           | -d        | /usr/bin/                   | purple     | 
+| S_IFBLK  | block device     | b                           | -b        | /dev/nvme0n1p2              | yellow     | 
+| S_IFREG  | regular file     | f/-                         | -f        | /usr/include/stdio.h        | white      | 
+| S_IFLNK  | symbolic link    | l                           | -L/-h     | /usr/lib/libcurl.so         | aqua       | 
+| S_IFSOCK | socket           | s                           | -S        | /tmp/mongodb-27017.sock     | magenta    | 
 
 ```csv
-stat.h,file_type,$LS_COLORS,test,find -type,example
-S_IFIFO,FIFO(pipe),amber,-p,p,/run/systemd/sessions/1.ref
-S_IFCHR,character device,yellow,-c,c,/dev/console
-S_IFDIR,directory,purple,-d,d,/usr/bin/
-S_IFBLK,block device,yellow,-b,b,/dev/nvme0n1p2
-S_IFREG,regular file,white,-f,f,/usr/include/stdio.h
-S_IFLNK,symbolic link,aqua,-L/-h,l,/usr/lib/libcurl.so
-S_IFSOCK,socket,magenta,-S,s,/tmp/mongodb-27017.sock
+stat.h,file_type,find -type/ls-l(first char),bash test,example,$LS_COLORS
+S_IFIFO,FIFO(pipe),p,-p,/run/systemd/sessions/1.ref,amber
+S_IFCHR,character device,c,-c,/dev/console,yellow
+S_IFDIR,directory,d,-d,/usr/bin/,purple
+S_IFBLK,block device,b,-b,/dev/nvme0n1p2,yellow
+S_IFREG,regular file,f/-,-f,/usr/include/stdio.h,white
+S_IFLNK,symbolic link,l,-L/-h,/usr/lib/libcurl.so,aqua
+S_IFSOCK,socket,s,-S,/tmp/mongodb-27017.sock ,magenta
 ```
 
 - 串行读写设备示例: 磁带，键盘

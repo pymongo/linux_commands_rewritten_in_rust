@@ -26,6 +26,12 @@ https://man7.org/linux/man-pages/man3/errno.3.html
 
 > errno is thread-local
 
+## errno可能要复制保存
+
+例如通过printf打印errno时，如果printf报错则会覆盖旧的errno
+
+所以要在printf之前将errno copy into a variable
+
 ## errno错误码示例
 
 ### ENOENT 2 No such file or directory
