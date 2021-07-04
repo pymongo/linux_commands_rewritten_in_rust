@@ -48,7 +48,7 @@ https://man7.org/linux/man-pages/man3/errno.3.html
 ### EADDRINUSE 98 Address already in use
 */
 
-fn last_errno() -> i32 {
+pub fn last_errno() -> i32 {
     // std::io::Error::last_os_error().raw_os_error().unwrap()
     unsafe { *libc::__errno_location() }
 }
