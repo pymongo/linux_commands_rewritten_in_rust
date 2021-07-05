@@ -26,11 +26,9 @@ https://man7.org/linux/man-pages/man3/errno.3.html
 
 > errno is thread-local
 
-## errno可能要复制保存
+## errno should copy immediately
 
-例如通过printf打印errno时，如果printf报错则会覆盖旧的errno
-
-所以要在printf之前将errno copy into a variable
+除了C标准库函数，还有很多库都会修改extern int errno，包括Rust的print(毕竟调用了libc::write)
 
 ## errno错误码示例
 

@@ -1,6 +1,5 @@
 //! ls (GNU coreutils)
 #![warn(clippy::nursery, clippy::pedantic)]
-use linux_commands_rewritten_in_rust::errno::last_errno_message;
 
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();
@@ -10,13 +9,15 @@ fn main() {
         ".\0".to_string()
     };
 
-    let dir = unsafe { libc::opendir(input_filename.as_ptr().cast()) };
-    if dir.is_null() {
-        eprintln!("{}", last_errno_message());
+    let dirp = unsafe { libc::opendir(input_filename.as_ptr().cast()) };
+    if dirp.is_null() {
+        unsafe {
+            libc::perror(input_filename.as_ptr().cast());
+        }
         return;
     }
     loop {
-        let dir_entry = unsafe { libc::readdir(dir) };
+        let dir_entry = unsafe { libc::readdir(dirp) };
         if dir_entry.is_null() {
             // directory_entries iterator end
             break;

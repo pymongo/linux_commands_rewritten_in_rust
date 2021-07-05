@@ -1,6 +1,5 @@
 //! stat (GNU coreutils)
 #![warn(clippy::nursery, clippy::pedantic)]
-use linux_commands_rewritten_in_rust::errno::last_errno_message;
 use linux_commands_rewritten_in_rust::strftime::format_timestamp_with_nanosecond;
 
 fn main() {
@@ -29,7 +28,7 @@ fn my_stat(filename: &str) {
     let mut file_stat = unsafe { std::mem::zeroed() };
     let ret = unsafe { libc::stat(filename_with_nul.as_ptr().cast(), &mut file_stat) };
     if ret == -1 {
-        eprintln!("{}", last_errno_message());
+        unsafe { libc::perror("\0".as_ptr().cast()) }
     }
     println!("  File: {}", filename);
     println!(

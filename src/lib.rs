@@ -43,8 +43,16 @@
 
 ---
 
-## Linux commands rewritten in Rust todo-list
-- use clap to catch command line args? https://github.com/clap-rs/clap
+## 系统调用都是软中断
+
+TODO
+
+---
+
+## 系统调用常见缩写
+- dirp -> directory stream pointer
+- ent -> entry: dirent.h, ENOENT(error no entry)
+
 */
 #![warn(clippy::nursery, clippy::pedantic)]
 #![allow(clippy::module_name_repetitions, clippy::doc_markdown)]
