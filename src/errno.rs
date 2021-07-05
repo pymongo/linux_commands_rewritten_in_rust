@@ -46,6 +46,10 @@ https://man7.org/linux/man-pages/man3/errno.3.html
 - io_uring not enough lockable memory, please increase memlock config in /etc/security/limits.conf
 
 ### EADDRINUSE 98 Address already in use
+
+### 其它错误
+- disk is full
+- too many open files(ulimits max open fd)
 */
 #[must_use]
 pub fn last_errno() -> i32 {

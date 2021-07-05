@@ -41,6 +41,10 @@
 
 此时会更新 thread_local 的 errno 变量，可以通过 errno 相关的几个系统调用知道错误码或错误原因
 
+---
+
+## Linux commands rewritten in Rust todo-list
+- use clap to catch command line args? https://github.com/clap-rs/clap
 */
 #![warn(clippy::nursery, clippy::pedantic)]
 #![allow(clippy::module_name_repetitions, clippy::doc_markdown)]
