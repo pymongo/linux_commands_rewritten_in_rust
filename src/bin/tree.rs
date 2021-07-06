@@ -1,6 +1,8 @@
 //! tree <https://archlinux.org/packages/extra/x86_64/tree/>
 #![warn(clippy::nursery, clippy::pedantic)]
 
+use linux_commands_rewritten_in_rust::errno::last_errno_message;
+
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();
     let input_filename = if let Some(filename) = args.get(1) {
@@ -42,7 +44,10 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
         // 2. check file whether a directory
         let mut stat_buf = std::mem::zeroed();
         // lstat doesn't follow link, prevent a link b and b link a cause infinite loop
-        libc::lstat(filename_cstr, &mut stat_buf);
+        let stat_ret = libc::lstat(filename_cstr, &mut stat_buf);
+        if stat_ret == -1 {
+            panic!("{}", last_errno_message());
+        }
         let is_dir = stat_buf.st_mode & libc::S_IFMT == libc::S_IFDIR;
 
         // 3. convert filename from [c_char; 256] to String
@@ -58,11 +63,11 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
 
         if is_dir {
             // backtracking: opendir<->closedir, chdir(..)<->chdir("..\0")
-            let dirp2 = libc::opendir(filename_cstr);
+            let dirp_inner_dir = libc::opendir(filename_cstr);
             libc::chdir(filename_cstr);
-            traverse_dir_dfs(dirp2, indent + 4);
+            traverse_dir_dfs(dirp_inner_dir, indent + 4);
             libc::chdir("..\0".as_ptr().cast());
-            libc::closedir(dirp);
+            libc::closedir(dirp_inner_dir);
         }
     }
 }
