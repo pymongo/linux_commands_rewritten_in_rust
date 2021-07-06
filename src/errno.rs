@@ -80,10 +80,7 @@ pub fn errno_err_msg(errno: i32) -> Result<String, std::io::ErrorKind> {
     }
     assert_eq!(ret, 0);
 
-    // 标准库bytes转str是先通过libc::strlen得知bytes第一个nul_byte的索引
-    //let err_msg_buf_len = buf.iter().position(|&x| x == b'\0').unwrap();
     let err_msg_buf_len = unsafe { libc::strlen(buf.as_ptr().cast()) };
-
     let err_msg = unsafe { String::from_utf8_unchecked(buf[..err_msg_buf_len].to_vec()) };
     Ok(err_msg)
 }
