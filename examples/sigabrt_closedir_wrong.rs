@@ -1,23 +1,14 @@
-//! tree <https://archlinux.org/packages/extra/x86_64/tree/>
-#![warn(clippy::nursery, clippy::pedantic)]
-
 fn main() {
-    let args = std::env::args().collect::<Vec<_>>();
-    let input_filename = if let Some(filename) = args.get(1) {
-        format!("{}\0", filename)
-    } else {
-        ".\0".to_string()
-    };
-
-    let input_filename_cstr = input_filename.as_ptr().cast();
-    let dirp = unsafe { libc::opendir(input_filename_cstr) };
+    let dir_name = "/\0";
+    let dir_name_cstr = dir_name.as_ptr().cast();
+    let dirp = unsafe { libc::opendir(dir_name_cstr) };
     if dirp.is_null() {
         unsafe {
-            libc::perror(input_filename_cstr);
+            libc::perror(dir_name_cstr);
         }
         return;
     }
-    unsafe { libc::chdir(input_filename_cstr) };
+    unsafe { libc::chdir(dir_name_cstr) };
     unsafe {
         traverse_dir_dfs(dirp, 0);
     }
@@ -27,6 +18,8 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
     loop {
         let dir_entry = libc::readdir(dirp);
         if dir_entry.is_null() {
+            // malloc(): unsorted double linked list corrupted\n `Aborted (core dumped)` exit code 134 (interrupted by signal 6: SIGABRT)
+            let _sigabrt_line = std::env::current_dir().unwrap();
             return;
         }
         let dir_entry = *dir_entry;
@@ -59,12 +52,12 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
         );
 
         if is_dir {
-            // backtracking: opendir<->closedir, chdir(filename_cstr)<->chdir("..\0")
             let dirp_inner_dir = libc::opendir(filename_cstr);
             libc::chdir(filename_cstr);
             traverse_dir_dfs(dirp_inner_dir, indent + 4);
             libc::chdir("..\0".as_ptr().cast());
-            libc::closedir(dirp_inner_dir);
+            // Bug is here: wrong recursive backtracking, this should be `closedir(dirp_inner_dir)`
+            libc::closedir(dirp);
         }
     }
 }

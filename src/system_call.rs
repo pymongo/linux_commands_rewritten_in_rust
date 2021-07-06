@@ -15,6 +15,7 @@ other better alternatives:
 1. let pwd_str_len = buf.iter().position(|&x| x == b'\0').unwrap();
 2. let pwd_str_len = unsafe { libc::strlen(buf.as_ptr().cast()) };
 */
+#[must_use]
 pub fn getcwd() -> String {
     const BUF_LEN: usize = 256;
     let mut buf = [0_u8; BUF_LEN];
