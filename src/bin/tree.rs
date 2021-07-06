@@ -8,7 +8,8 @@ fn main() {
     let input_filename = if let Some(filename) = args.get(1) {
         format!("{}\0", filename)
     } else {
-        ".\0".to_string()
+        "/home/w/\0".to_string()
+        //".\0".to_string()
     };
 
     let input_filename_cstr = input_filename.as_ptr().cast();
@@ -29,6 +30,7 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
     loop {
         let dir_entry = libc::readdir(dirp);
         if dir_entry.is_null() {
+            dbg!(std::env::current_dir().unwrap());
             return;
         }
         let dir_entry = *dir_entry;
@@ -67,7 +69,7 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
             libc::chdir(filename_cstr);
             traverse_dir_dfs(dirp_inner_dir, indent + 4);
             libc::chdir("..\0".as_ptr().cast());
-            libc::closedir(dirp_inner_dir);
+            libc::closedir(dirp);
         }
     }
 }
