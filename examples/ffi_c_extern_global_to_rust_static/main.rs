@@ -1,12 +1,12 @@
-#[link(name = "readline", kind="dylib")]
+#[link(name = "readline", kind = "dylib")]
 extern "C" {
     static rl_readline_version: libc::c_int;
 }
 
-#[link(name = "c", kind="dylib")]
+#[link(name = "c", kind = "dylib")]
 extern "C" {
     /// extern char **environ;
-    /// In C, `extern` mean `public static`, `static` mean `private static` 
+    /// In C, `extern` mean `public static`, `static` mean `private static`
     static environ: *const *const libc::c_char;
 }
 
@@ -20,6 +20,10 @@ unsafe fn traverse_env_vars() {
 }
 
 fn main() {
-    println!("version of `libreadline.so` = {}", unsafe { rl_readline_version });
-    unsafe { traverse_env_vars();};
+    println!("version of `libreadline.so` = {}", unsafe {
+        rl_readline_version
+    });
+    unsafe {
+        traverse_env_vars();
+    };
 }

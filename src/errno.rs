@@ -56,8 +56,6 @@ pub fn last_errno() -> i32 {
     unsafe { *libc::__errno_location() }
 }
 
-/// ## Panics
-/// system call strerror_r failed
 #[must_use]
 #[inline]
 pub fn last_errno_message() -> String {
@@ -66,10 +64,6 @@ pub fn last_errno_message() -> String {
 }
 
 /**
-## Panics
-panic on strerror_r failed
-## Errors
-Invalid errno input
 */
 pub fn errno_err_msg(errno: i32) -> Result<String, std::io::ErrorKind> {
     const BUF_LEN: usize = 128;

@@ -54,8 +54,16 @@ TODO
 - ent -> entry: dirent.h, ENOENT(error no entry)
 
 */
+
 #![warn(clippy::nursery, clippy::pedantic)]
-#![allow(clippy::module_name_repetitions, clippy::doc_markdown)]
+#![allow(
+    clippy::module_name_repetitions,
+    clippy::doc_markdown,
+    clippy::missing_safety_doc,
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc
+)]
+
 pub mod errno;
-pub mod strftime;
-pub mod system_call;
+pub mod file_system;
+pub mod time;
