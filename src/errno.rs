@@ -52,6 +52,7 @@ https://man7.org/linux/man-pages/man3/errno.3.html
 #[must_use]
 pub fn last_errno() -> i32 {
     // std::io::Error::last_os_error().raw_os_error().unwrap()
+    // 一定要调用 errno_location 获取 errno, 直接获取 `static errno: libc::c_int` 的值会 segfault
     unsafe { *libc::__errno_location() }
 }
 

@@ -1,3 +1,39 @@
+/*!
+SIGABRT 的可能原因:
+- double free, example: `closedir(dirp);closedir(dirp);`
+
+## 避免 double free 的编码习惯
+
+单线程应用，在 free(ptr) 之后将 ptr 设置为 NULL，多线程应用则用引用计数
+
+```no_run
+// bad
+let dirp = libc::opendir("/home\0".as_ptr().cast());
+libc::closedir(dirp);
+libc::closedir(dirp);
+```
+
+```no_run
+// good example
+let mut dirp = libc::opendir("/home\0".as_ptr().cast());
+libc::closedir(dirp);
+dirp = std::ptr::null_mut();
+libc::closedir(dirp);
+dirp = std::ptr::null_mut();
+```
+
+## double free 不一定及时报错
+
+例如错误递归或循环间隐式的free同一个资源，程序会被valgrind检查出`closedir InvalidFree`
+
+但是进程却能正常退出，如果加上 current_dir 的函数调用程序则 SIGABRT
+
+原因是 操作系统/进程 并不会立即回收内存，更像是异步的回收内存，在回收/申请堆内存时才会检查并报错 SIGABRT
+
+而 Rust 的 current_dir 就像 Future::poll 去申请内存(因为文件绝对路径可能很长，需要扩容)
+
+Rust 申请内存时发现当前进程居然有几块 double free 的内存，为了避免错误进一步扩散，就报错 SIGABRT
+*/
 fn main() {
     let dir_name = "/\0";
     let dir_name_cstr = dir_name.as_ptr().cast();
@@ -56,7 +92,9 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
             libc::chdir(filename_cstr);
             traverse_dir_dfs(dirp_inner_dir, indent + 4);
             libc::chdir("..\0".as_ptr().cast());
-            // Bug is here: wrong recursive backtracking, this should be `closedir(dirp_inner_dir)`
+            // Bug is here: this should be `closedir(dirp_inner_dir)`
+            // https://github.com/rust-lang/rust/issues/86899
+            // if a directory has two subdirectory, this would cause **`double free`** (closedir to a same dir twice)
             libc::closedir(dirp);
         }
     }

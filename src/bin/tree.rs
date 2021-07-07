@@ -65,6 +65,8 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
             traverse_dir_dfs(dirp_inner_dir, indent + 4);
             libc::chdir("..\0".as_ptr().cast());
             libc::closedir(dirp_inner_dir);
+            // set ptr to null after tree to prevent double free
+            // dirp_inner_dir = std::ptr::null_mut();
         }
     }
 }

@@ -1,3 +1,8 @@
+/*!
+SIGSEGV 的可能原因:
+- dereference NULL or invalid_address, example: readdir(NULL)
+
+*/
 fn main() {
     let input_filename = format!("{}/Cargo.toml\0", env!("CARGO_MANIFEST_DIR"));
     // Bug is here: should check dirp.is_null(). if input_filename not a dir, dirp would be NULL
