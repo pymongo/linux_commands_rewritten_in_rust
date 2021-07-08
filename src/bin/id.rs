@@ -7,6 +7,17 @@ libc::getuid() and libc::getgid()
 ## how to find_uid_by_username?
 libc::getpwnam(), libc::getpwnam_r() need to input user's password
 reference: <https://stackoverflow.com/questions/39157675/how-to-get-linux-user-id-by-user-name>
+
+## how to list/traverse all username
+```text
+loop {
+    let entries = libc::getpwent();
+    if entries.is_null() {
+        break;
+    }
+    libc::printf("%s\n\0".as_ptr().cast(), (*entries).pw_name);
+}
+```
 */
 
 use linux_commands_rewritten_in_rust::errno::{last_errno, last_errno_message};

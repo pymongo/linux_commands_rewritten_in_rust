@@ -52,7 +52,7 @@ TODO
 ## 系统调用常见缩写
 - dirp -> directory stream pointer
 - ent -> entry: dirent.h, ENOENT(error no entry)
-
+- nam -> name: getpwnam, tmpnam
 */
 
 #![warn(clippy::nursery, clippy::pedantic)]
