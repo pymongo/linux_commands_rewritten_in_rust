@@ -1,9 +1,9 @@
-#[link(name = "readline", kind = "dylib")]
+#[link(name = "readline")]
 extern "C" {
     static rl_readline_version: libc::c_int;
 }
 
-#[link(name = "c", kind = "dylib")]
+#[link(name = "c")]
 extern "C" {
     /// extern char **environ;
     /// In C, `extern` mean `public static`, `static` mean `private static`

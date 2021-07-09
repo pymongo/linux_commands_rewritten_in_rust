@@ -1,4 +1,5 @@
 /*!
+Linux would terminal process when process dereference of a invalid address(SIGSEGV)
 SIGSEGV 的可能原因:
 - dereference NULL or invalid_address, example: readdir(NULL)
 

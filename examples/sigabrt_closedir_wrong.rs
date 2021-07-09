@@ -24,6 +24,14 @@ dirp = std::ptr::null_mut();
 
 ## double free 不一定及时报错
 
+《 Beginning Linux Programm 4th edition 》 Page 260 有详细介绍(PDF 293页):
+
+> allocated memory is writing beyond the end of an allocated block(one example is double-free)
+
+例如尝试free一块已经回收的内存(allocated memory beyond the block)
+
+> one reason malloc failed is the memory structures have been corrupted, When this happens, the program may not terminate immediately
+
 例如错误递归或循环间隐式的free同一个资源，程序会被valgrind检查出`closedir InvalidFree`
 
 但是进程却能正常退出，如果加上 current_dir 的函数调用程序则 SIGABRT
