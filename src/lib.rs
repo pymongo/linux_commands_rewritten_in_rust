@@ -53,8 +53,9 @@ TODO
 - dirp -> directory stream pointer
 - ent -> entry: dirent.h, ENOENT(error no entry)
 - nam -> name: getpwnam, tmpnam
+- ppid -> parent PID
 */
-
+#![feature(extern_types)]
 #![warn(clippy::nursery, clippy::pedantic)]
 #![allow(
     clippy::module_name_repetitions,
@@ -64,6 +65,7 @@ TODO
     clippy::missing_panics_doc
 )]
 
+pub mod dylibs_binding;
 pub mod errno;
 pub mod file_system;
 pub mod time;

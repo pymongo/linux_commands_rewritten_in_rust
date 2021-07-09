@@ -79,3 +79,46 @@ pub fn errno_err_msg(errno: i32) -> Result<String, std::io::ErrorKind> {
     let err_msg = unsafe { String::from_utf8_unchecked(buf[..err_msg_buf_len].to_vec()) };
     Ok(err_msg)
 }
+
+/**
+TODO
+parse file like this
+```text
+#define _ASM_GENERIC_ERRNO_H
+
+#include <asm-generic/errno-base.h>
+
+#define EDEADLK     35  /* Resource deadlock would occur */
+#define ENAMETOOLONG    36  /* File name too long */
+```
+
+> grep -r "#define[[:blank:]]ENOENT" .
+*/
+#[allow(dead_code)]
+unsafe fn read_errno() {
+    let f = libc::fopen(
+        "/usr/include/asm-generic/errno-base.h\0".as_ptr().cast(),
+        "r\0".as_ptr().cast(),
+    );
+    libc::perror(std::ptr::null());
+    assert!(!f.is_null());
+    // let mut line_buf_len = 256;
+    let mut line_buf = [0_u8; 256];
+    loop {
+        // my libc::getline usage is not working
+        let nread = libc::fgets(line_buf.as_mut_ptr().cast(), 256, f);
+        if nread.is_null() {
+            libc::perror(std::ptr::null());
+            break;
+        }
+        libc::printf("%s\0".as_ptr().cast(), line_buf.as_ptr());
+    }
+    //libc::fscanf(stream, format)
+}
+
+#[test]
+fn feature() {
+    unsafe {
+        read_errno();
+    }
+}

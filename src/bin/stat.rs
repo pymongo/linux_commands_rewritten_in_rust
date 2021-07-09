@@ -15,7 +15,7 @@ fn main() {
             println!("source code: https://github.com/pymongo/linux_commands_rewritten_in_rust");
         }
         "--help" => {
-            println!("help doc is TODO");
+            println!("help doc is working in progress");
         }
         filename => {
             my_stat(filename);
@@ -28,7 +28,9 @@ fn my_stat(filename: &str) {
     let mut file_stat = unsafe { std::mem::zeroed() };
     let ret = unsafe { libc::stat(filename_with_nul.as_ptr().cast(), &mut file_stat) };
     if ret == -1 {
-        unsafe { libc::perror("\0".as_ptr().cast()) }
+        unsafe {
+            libc::perror(std::ptr::null());
+        }
     }
     println!("  File: {}", filename);
     println!(
