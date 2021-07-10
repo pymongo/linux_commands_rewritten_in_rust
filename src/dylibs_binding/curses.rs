@@ -1,6 +1,8 @@
+#[cfg(test)]
 use std::os::raw::c_int;
 
 /// curses/ncurses: a terminal ui facilities
+#[cfg(test)]
 #[link(name = "curses")]
 extern "C" {
     type window;
@@ -12,7 +14,7 @@ extern "C" {
     fn printw(format: *const libc::c_char, ...) -> c_int;
 }
 
-#[allow(dead_code)]
+#[cfg(test)]
 unsafe fn curses_hello_world() {
     initscr();
     move_(10, 15);

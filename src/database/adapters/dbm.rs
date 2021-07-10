@@ -1,0 +1,193 @@
+use crate::database::models::user::{CrudUserDao, User, Username};
+use crate::dylibs_binding::dbm::{datum, dbm_close, dbm_fetch, dbm_ptr, dbm_store, StoreMode};
+
+struct DbmDb {
+    dbm_ptr: *mut dbm_ptr,
+}
+
+impl DbmDb {
+    #[cfg(test)]
+    fn new() -> Self {
+        use crate::dylibs_binding::dbm::dbm_open;
+        let dbm_ptr = unsafe {
+            dbm_open(
+                Self::DB_FILENAME,
+                libc::O_RDWR | libc::O_CREAT,
+                libc::S_IRUSR | libc::S_IWUSR,
+            )
+        };
+        if dbm_ptr.is_null() {
+            panic!("{}", std::io::Error::last_os_error());
+        }
+        Self { dbm_ptr }
+    }
+}
+
+impl Drop for DbmDb {
+    #[allow(clippy::shadow_unrelated)]
+    fn drop(&mut self) {
+        unsafe {
+            dbm_close(self.dbm_ptr);
+            // python: os.path.basename, Rust: file_stem
+            let file_stem = libc::strdup(Self::DB_FILENAME);
+            let file_dir = libc::strcat(file_stem, ".dir\0".as_ptr().cast());
+            let file_stem = libc::strdup(Self::DB_FILENAME);
+            let file_pag = libc::strcat(file_stem, ".pag\0".as_ptr().cast());
+            libc::unlink(file_dir);
+            libc::unlink(file_pag);
+        }
+    }
+}
+
+impl CrudUserDao for DbmDb {
+    type Model = User;
+    unsafe fn insert_sample_data(&self) {
+        for user_id in 0..Self::Model::LEN {
+            let mut user_id = user_id as u8;
+            let mut user = Self::Model::new(user_id);
+            let key_datum = datum {
+                dptr: (&mut user_id as *mut u8).cast(),
+                dsize: std::mem::size_of_val(&user_id) as i32,
+            };
+            let value_datum = datum {
+                dptr: user.as_mut_ptr().cast(),
+                dsize: User::SIZE as i32,
+            };
+            assert_eq!(
+                dbm_store(self.dbm_ptr, key_datum, value_datum, StoreMode::DBM_INSERT),
+                0
+            );
+        }
+    }
+
+    unsafe fn select_all(&self) -> Vec<Self::Model> {
+        let mut users = vec![];
+        for user_id in 0..Self::Model::LEN {
+            let mut user_id = user_id as u8;
+            let key_datum = datum {
+                dptr: (&mut user_id as *mut u8).cast(),
+                dsize: std::mem::size_of_val(&user_id) as i32,
+            };
+            let value_datum = dbm_fetch(self.dbm_ptr, key_datum);
+            if !value_datum.dptr.is_null() {
+                let mut user = std::mem::zeroed::<User>();
+                std::ptr::copy(
+                    value_datum.dptr.cast(),
+                    user.as_mut_ptr(),
+                    value_datum.dsize as usize,
+                );
+                users.push(user);
+            }
+        }
+        users
+    }
+
+    unsafe fn find_user_by_id(&self, mut user_id: u8) -> Self::Model {
+        assert!(User::user_id_is_valid(user_id));
+        let key_datum = datum {
+            dptr: (&mut user_id as *mut u8).cast(),
+            dsize: std::mem::size_of_val(&user_id) as i32,
+        };
+        let value_datum = dbm_fetch(self.dbm_ptr, key_datum);
+        if value_datum.dptr.is_null() {
+            panic!("user_id={} not found!", user_id);
+        } else {
+            let mut user = std::mem::zeroed::<User>();
+            std::ptr::copy(
+                value_datum.dptr.cast(),
+                user.as_mut_ptr(),
+                value_datum.dsize as usize,
+            );
+            user
+        }
+    }
+
+    unsafe fn update_username_by_id(&self, mut user_id: u8, username: Username) {
+        assert!(User::user_id_is_valid(user_id));
+        let key_datum = datum {
+            dptr: (&mut user_id as *mut u8).cast(),
+            dsize: std::mem::size_of_val(&user_id) as i32,
+        };
+        let value_datum = dbm_fetch(self.dbm_ptr, key_datum);
+        if value_datum.dptr.is_null() {
+            panic!("user_id={} not found!", user_id);
+        } else {
+            let mut user = std::mem::zeroed::<User>();
+            std::ptr::copy(
+                value_datum.dptr.cast(),
+                user.as_mut_ptr(),
+                value_datum.dsize as usize,
+            );
+            user.username = username;
+            let key_datum = datum {
+                dptr: (&mut user_id as *mut u8).cast(),
+                dsize: std::mem::size_of_val(&user_id) as i32,
+            };
+            let value_datum = datum {
+                dptr: user.as_mut_ptr().cast(),
+                dsize: User::SIZE as i32,
+            };
+            assert_eq!(
+                dbm_store(self.dbm_ptr, key_datum, value_datum, StoreMode::DBM_REPLACE),
+                0
+            );
+        }
+    }
+}
+
+#[test]
+fn test_dbm_database() {
+    let db_adapter = DbmDb::new();
+    crate::database::models::user::test_user_crud(&db_adapter);
+}
+
+#[cfg(test)]
+unsafe fn dbm_insert_and_get() {
+    let handle = DbmDb::new();
+
+    let mut key = 1;
+    let mut user = User::new(key);
+
+    let key_datum = datum {
+        dptr: (&mut key as *mut u8).cast(),
+        dsize: std::mem::size_of_val(&key) as i32,
+    };
+    let value_datum = datum {
+        dptr: user.as_mut_ptr().cast(),
+        dsize: User::SIZE as i32,
+    };
+    assert_eq!(
+        dbm_store(
+            handle.dbm_ptr,
+            key_datum,
+            value_datum,
+            StoreMode::DBM_INSERT
+        ),
+        0
+    );
+
+    let key_datum = datum {
+        dptr: (&mut key as *mut u8).cast(),
+        dsize: std::mem::size_of_val(&key) as i32,
+    };
+    let value_datum = dbm_fetch(handle.dbm_ptr, key_datum);
+    assert!(!value_datum.dptr.is_null());
+
+    // copy user data from database
+    let mut user = std::mem::zeroed::<User>();
+    //std::ptr::copy(value_datum.dptr.cast(), user.as_mut_ptr(), value_datum.dsize as usize);
+    libc::memcpy(
+        user.as_mut_ptr().cast(),
+        value_datum.dptr.cast(),
+        value_datum.dsize as usize,
+    );
+
+    dbg!(user);
+}
+
+#[test]
+fn test_dbm_insert_and_get() {
+    unsafe {
+        dbm_insert_and_get();
+    }
+}

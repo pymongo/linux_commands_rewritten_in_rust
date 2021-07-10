@@ -17,7 +17,9 @@ fn main() {
         }
         return;
     }
-    unsafe { libc::chdir(input_filename_cstr) };
+    unsafe {
+        libc::chdir(input_filename_cstr);
+    }
     unsafe {
         traverse_dir_dfs(dirp, 0);
     }

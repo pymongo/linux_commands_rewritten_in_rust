@@ -25,6 +25,7 @@ extern "C" {
     ) -> libc::size_t;
     /// strptime not found in windows
     /// return the last one char  consumed in the conversion
+    #[cfg(test)]
     fn strptime(
         s: *const libc::c_char,
         format: *const libc::c_char,
@@ -38,8 +39,7 @@ const RFC_3339_LEN: usize = RFC_3339_EXAMPLE.len();
 const RFC_3339_FORMAT: *const i8 = "%Y-%m-%dT%H:%M:%S%z\0".as_ptr().cast();
 
 /// s must end with nul
-#[allow(dead_code)]
-#[allow(clippy::cast_possible_wrap)]
+#[cfg(test)]
 unsafe fn parse_rfc_3339_to_tm(s: &str) -> libc::tm {
     let mut tm = std::mem::zeroed();
     let parse_len = strptime(s.as_ptr().cast(), RFC_3339_FORMAT, &mut tm);
@@ -103,7 +103,7 @@ pub fn format_timestamp_with_nanosecond(
     let mut tm = unsafe { std::mem::zeroed() };
     unsafe {
         libc::localtime_r(&timestamp, &mut tm);
-    };
+    }
     let ymd_hms = tm_to_rfc_3339(&tm);
     let timezone = tm.tm_gmtoff / 3600 + if tm.tm_isdst > 0 { 1 } else { 0 };
     format!("{}.{} {:+03}00", ymd_hms, nanosecond, timezone)

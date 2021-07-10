@@ -42,7 +42,6 @@ impl CrudUserDao for FreadFwriteDb {
     ```
     note that user_id=006 is escape to b'\a' in od
     */
-    #[allow(clippy::cast_possible_truncation)]
     unsafe fn insert_sample_data(&self) {
         for user_id in 0..Self::Model::LEN {
             let user = Self::Model::new(user_id as u8);

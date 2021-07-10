@@ -63,8 +63,6 @@ pub fn last_errno_message() -> String {
     errno_err_msg(errno).unwrap()
 }
 
-/**
-*/
 pub fn errno_err_msg(errno: i32) -> Result<String, std::io::ErrorKind> {
     const BUF_LEN: usize = 128;
     let mut buf = [0_u8; BUF_LEN];
@@ -94,7 +92,7 @@ parse file like this
 
 > grep -r "#define[[:blank:]]ENOENT" .
 */
-#[allow(dead_code)]
+#[cfg(test)]
 unsafe fn read_errno() {
     let f = libc::fopen(
         "/usr/include/asm-generic/errno-base.h\0".as_ptr().cast(),
@@ -117,7 +115,7 @@ unsafe fn read_errno() {
 }
 
 #[test]
-fn feature() {
+fn test_read_errno() {
     unsafe {
         read_errno();
     }

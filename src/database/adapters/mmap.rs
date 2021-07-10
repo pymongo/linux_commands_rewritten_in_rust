@@ -62,7 +62,6 @@ impl Drop for MmapDb {
 
 impl CrudUserDao for MmapDb {
     type Model = User;
-    #[allow(clippy::cast_possible_truncation)]
     unsafe fn insert_sample_data(&self) {
         // 注意不能解引用，否则解引用之后会是Copy语义，不能修改到mmap对应的文件数据
         let users = self.mapped_addr.cast::<[Self::Model; Self::Model::LEN]>();

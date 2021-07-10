@@ -4,7 +4,7 @@
 fn main() {
     unsafe {
         main_();
-    };
+    }
 }
 
 unsafe fn main_() {

@@ -49,7 +49,6 @@ impl User {
         self as *mut Self
     }
 
-    #[allow(clippy::cast_possible_truncation)]
     pub const fn user_id_is_valid(user_id: u8) -> bool {
         user_id < Self::LEN as u8
     }

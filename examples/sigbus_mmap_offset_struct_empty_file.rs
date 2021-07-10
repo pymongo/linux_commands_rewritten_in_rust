@@ -16,7 +16,7 @@ fn main() {
     const SIZE: usize = std::mem::size_of::<Byte>();
     let fd = unsafe {
         libc::open(
-            "/tmp/my_sigbus_example\0".as_ptr().cast(),
+            "/tmp/my_mmap_data\0".as_ptr().cast(),
             libc::O_RDWR | libc::O_CREAT,
             libc::S_IRUSR | libc::S_IWUSR,
         )
