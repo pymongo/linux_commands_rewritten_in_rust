@@ -1,7 +1,12 @@
 /*!
-# 系统调用通用知识
+# Linux system programming
 
-## 相同名字的命令(可执行文件)和系统调用函数成对出现
+This repo is cover these topics:
+- linux commands rewritten in Rust
+
+## 系统调用通用知识
+
+### 相同名字的命令(可执行文件)和系统调用函数成对出现
 
 大部分系统调用函数都会有一个同名的命令，例如chmod命令对应chmod系统调用函数
 
@@ -9,7 +14,7 @@
 
 ---
 
-## 所有系统调用函数指针类型入参都有`restrict`修饰
+### 所有系统调用函数指针类型入参都有`restrict`修饰
 
 这是为了编译器优化，可以参考: <https://www.zhihu.com/question/41653775>
 
@@ -21,7 +26,7 @@
 
 ---
 
-## 获取C语言函数返回值的几种情况
+### 获取C语言函数返回值的几种情况
 
 1. 返回值是`T`，直接用let接收返回值即可，例如: rand, time
 2. (尽量不用)返回值是`*const T`，解引用返回值原始指针，例如: localtime
@@ -35,7 +40,7 @@
 
 ---
 
-## 系统调用函数错误处理
+### 系统调用函数错误处理
 
 系统调用失败时会返回 -1(例如stat) 或 NULL(例如localtime_r)
 
@@ -43,13 +48,13 @@
 
 ---
 
-## 系统调用都是软中断
+### 系统调用都是软中断
 
 TODO
 
 ---
 
-## 系统调用常见缩写
+### 系统调用常见缩写
 - dirp -> directory stream pointer
 - ent -> entry: dirent.h, ENOENT(error no entry)
 - nam -> name: getpwnam, tmpnam
@@ -65,7 +70,8 @@ TODO
     clippy::missing_panics_doc
 )]
 
-pub mod dylibs_binding;
+mod database;
+mod dylibs_binding;
 pub mod errno;
 pub mod file_system;
 pub mod time;
