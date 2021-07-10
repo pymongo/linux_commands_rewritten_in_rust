@@ -52,7 +52,9 @@ fn main() {
         }
         return;
     }
-    unsafe { libc::chdir(dir_name_cstr) };
+    unsafe {
+        libc::chdir(dir_name_cstr);
+    }
     unsafe {
         traverse_dir_dfs(dirp, 0);
     }

@@ -1,11 +1,11 @@
 use crate::database::models::user::{CrudUserDao, User, Username};
 
-struct FreadFwriteDbHandle {
+struct FreadFwriteDb {
     /// database FILE stream pointer
     db_fp: *mut libc::FILE,
 }
 
-impl FreadFwriteDbHandle {
+impl FreadFwriteDb {
     #[cfg(test)]
     fn new() -> Self {
         let fp = unsafe { libc::fopen(Self::DB_FILENAME, "w+\0".as_ptr().cast()) };
@@ -16,20 +16,19 @@ impl FreadFwriteDbHandle {
     }
 }
 
-impl Drop for FreadFwriteDbHandle {
+impl Drop for FreadFwriteDb {
     fn drop(&mut self) {
         let close_ret = unsafe { libc::fclose(self.db_fp) };
         if close_ret == -1 {
             panic!("{}", std::io::Error::last_os_error());
         }
-        let unlink_ret = unsafe { libc::unlink(Self::DB_FILENAME) };
-        if unlink_ret == -1 {
-            panic!("{}", std::io::Error::last_os_error());
+        unsafe {
+            libc::unlink(Self::DB_FILENAME);
         }
     }
 }
 
-impl CrudUserDao for FreadFwriteDbHandle {
+impl CrudUserDao for FreadFwriteDb {
     type Model = User;
     /**
     ```text
@@ -90,6 +89,6 @@ impl CrudUserDao for FreadFwriteDbHandle {
 
 #[test]
 fn test_stdio_database() {
-    let db_adapter = FreadFwriteDbHandle::new();
+    let db_adapter = FreadFwriteDb::new();
     crate::database::models::user::test_user_crud(&db_adapter);
 }

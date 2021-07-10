@@ -56,7 +56,7 @@ impl User {
 }
 
 pub trait CrudUserDao {
-    type Model;
+    type Model: Sized + Clone + std::fmt::Debug;
     const DB_FILENAME: *const libc::c_char = "/tmp/my_db\0".as_ptr().cast();
     unsafe fn insert_sample_data(&self);
     unsafe fn select_all(&self) -> Vec<Self::Model>;

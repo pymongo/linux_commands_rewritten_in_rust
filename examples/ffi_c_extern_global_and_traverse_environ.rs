@@ -25,5 +25,5 @@ fn main() {
     });
     unsafe {
         traverse_env_vars();
-    };
+    }
 }
