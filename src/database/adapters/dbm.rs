@@ -1,5 +1,7 @@
 use crate::database::models::user::{CrudUserDao, User, Username};
-use crate::dylibs_binding::dbm::{datum, dbm_close, dbm_fetch, dbm_ptr, dbm_store, StoreMode};
+use crate::dylibs_binding::dbm::{
+    datum, dbm_close, dbm_fetch, dbm_firstkey, dbm_nextkey, dbm_ptr, dbm_store, StoreMode,
+};
 
 struct DbmDb {
     dbm_ptr: *mut dbm_ptr,
@@ -62,12 +64,12 @@ impl CrudUserDao for DbmDb {
 
     unsafe fn select_all(&self) -> Vec<Self::Model> {
         let mut users = vec![];
-        for user_id in 0..Self::Model::LEN {
-            let mut user_id = user_id as u8;
-            let key_datum = datum {
-                dptr: (&mut user_id as *mut u8).cast(),
-                dsize: std::mem::size_of_val(&user_id) as i32,
-            };
+        let mut key_datum = dbm_firstkey(self.dbm_ptr);
+        loop {
+            if key_datum.dptr.is_null() {
+                break;
+            }
+
             let value_datum = dbm_fetch(self.dbm_ptr, key_datum);
             if !value_datum.dptr.is_null() {
                 let mut user = std::mem::zeroed::<User>();
@@ -78,7 +80,10 @@ impl CrudUserDao for DbmDb {
                 );
                 users.push(user);
             }
+
+            key_datum = dbm_nextkey(self.dbm_ptr);
         }
+        // 就像HashMap一样，此时的users是无序的
         users
     }
 
@@ -108,7 +113,7 @@ impl CrudUserDao for DbmDb {
             dptr: (&mut user_id as *mut u8).cast(),
             dsize: std::mem::size_of_val(&user_id) as i32,
         };
-        let value_datum = dbm_fetch(self.dbm_ptr, key_datum);
+        let mut value_datum = dbm_fetch(self.dbm_ptr, key_datum);
         if value_datum.dptr.is_null() {
             panic!("user_id={} not found!", user_id);
         } else {
@@ -119,14 +124,7 @@ impl CrudUserDao for DbmDb {
                 value_datum.dsize as usize,
             );
             user.username = username;
-            let key_datum = datum {
-                dptr: (&mut user_id as *mut u8).cast(),
-                dsize: std::mem::size_of_val(&user_id) as i32,
-            };
-            let value_datum = datum {
-                dptr: user.as_mut_ptr().cast(),
-                dsize: User::SIZE as i32,
-            };
+            value_datum.dptr = user.as_mut_ptr().cast();
             assert_eq!(
                 dbm_store(self.dbm_ptr, key_datum, value_datum, StoreMode::DBM_REPLACE),
                 0
@@ -142,16 +140,18 @@ fn test_dbm_database() {
 }
 
 #[cfg(test)]
-unsafe fn dbm_insert_and_get() {
+unsafe fn dbm_create_read_update_delete() {
+    use crate::dylibs_binding::dbm::dbm_delete;
     let handle = DbmDb::new();
 
     let mut key = 1;
     let mut user = User::new(key);
-
     let key_datum = datum {
         dptr: (&mut key as *mut u8).cast(),
         dsize: std::mem::size_of_val(&key) as i32,
     };
+
+    // § create
     let value_datum = datum {
         dptr: user.as_mut_ptr().cast(),
         dsize: User::SIZE as i32,
@@ -166,13 +166,9 @@ unsafe fn dbm_insert_and_get() {
         0
     );
 
-    let key_datum = datum {
-        dptr: (&mut key as *mut u8).cast(),
-        dsize: std::mem::size_of_val(&key) as i32,
-    };
-    let value_datum = dbm_fetch(handle.dbm_ptr, key_datum);
+    // § read
+    let mut value_datum = dbm_fetch(handle.dbm_ptr, key_datum);
     assert!(!value_datum.dptr.is_null());
-
     // copy user data from database
     let mut user = std::mem::zeroed::<User>();
     //std::ptr::copy(value_datum.dptr.cast(), user.as_mut_ptr(), value_datum.dsize as usize);
@@ -181,13 +177,33 @@ unsafe fn dbm_insert_and_get() {
         value_datum.dptr.cast(),
         value_datum.dsize as usize,
     );
-
     dbg!(user);
+
+    // § update
+    user.username = *b"tuseday";
+    value_datum.dptr = user.as_mut_ptr().cast();
+    assert_eq!(
+        dbm_store(
+            handle.dbm_ptr,
+            key_datum,
+            value_datum,
+            StoreMode::DBM_REPLACE
+        ),
+        0
+    );
+
+    // § delete
+    let delete_ret = dbm_delete(handle.dbm_ptr, key_datum);
+    if delete_ret == 0 {
+        println!("user_id={} delete success", user.user_id);
+    } else {
+        println!("user_id={} not exist!", user.user_id);
+    }
 }
 
 #[test]
-fn test_dbm_insert_and_get() {
+fn test_dbm_create_read_update_delete() {
     unsafe {
-        dbm_insert_and_get();
+        dbm_create_read_update_delete();
     }
 }

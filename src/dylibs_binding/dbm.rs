@@ -20,8 +20,15 @@ extern "C" {
         store_mode: libc::c_int,
     ) -> c_int;
     pub fn dbm_fetch(dbm_ptr: *mut dbm_ptr, key_datum: datum) -> datum;
+    pub fn dbm_firstkey(dbm_ptr: *mut dbm_ptr) -> datum;
+    pub fn dbm_nextkey(dbm_ptr: *mut dbm_ptr) -> datum;
+    #[cfg(test)]
+    pub fn dbm_delete(dbm_ptr: *mut dbm_ptr, key_datum: datum) -> c_int;
+    //fn dbm_error(dbm_ptr: *mut dbm_ptr) -> c_int;
+    //fn dbm_clearerror(dbm_ptr: *mut dbm_ptr) -> c_int;
 }
 
+/// store_mode arg of dbm_store
 pub struct StoreMode;
 
 impl StoreMode {
@@ -29,8 +36,7 @@ impl StoreMode {
     pub const DBM_REPLACE: c_int = 1;
 }
 
-/// store_mode of dbm_store
-
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub struct datum {
     /// this is a raw pointer of bytes
