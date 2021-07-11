@@ -29,6 +29,7 @@ impl Drop for DbmDb {
     #[allow(clippy::shadow_unrelated)]
     fn drop(&mut self) {
         unsafe {
+            dbg!(self.dbm_ptr.is_null());
             dbm_close(self.dbm_ptr);
             // python: os.path.basename, Rust: file_stem
             let file_stem = libc::strdup(Self::DB_FILENAME);

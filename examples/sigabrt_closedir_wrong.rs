@@ -88,7 +88,8 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
 
         // convert filename from [c_char; 256] to String
         let filename_len = libc::strlen(filename_cstr);
-        let filename_bytes = &*(&dir_entry.d_name[..filename_len] as *const [i8] as *const [u8]);
+        let filename_bytes =
+            &*(&dir_entry.d_name[..filename_len] as *const [libc::c_char] as *const [u8]);
         let filename_string = String::from_utf8_unchecked(filename_bytes.to_owned());
         println!(
             "{}{}{}",

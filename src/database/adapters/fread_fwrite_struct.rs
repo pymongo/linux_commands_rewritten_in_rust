@@ -67,7 +67,7 @@ impl CrudUserDao for FreadFwriteDb {
         let mut user = std::mem::zeroed::<Self::Model>();
         libc::fseek(
             self.db_fp,
-            i64::from(user_id) * Self::Model::SIZE as i64,
+            libc::c_long::from(user_id) * Self::Model::SIZE as libc::c_long,
             libc::SEEK_SET,
         );
         libc::fread(user.as_mut_ptr().cast(), Self::Model::SIZE, 1, self.db_fp);
@@ -76,7 +76,7 @@ impl CrudUserDao for FreadFwriteDb {
 
     unsafe fn update_username_by_id(&self, user_id: u8, username: Username) {
         assert!(User::user_id_is_valid(user_id));
-        let offset = i64::from(user_id) * Self::Model::SIZE as i64;
+        let offset = libc::c_long::from(user_id) * Self::Model::SIZE as libc::c_long;
         let mut user = std::mem::zeroed::<Self::Model>();
         libc::fseek(self.db_fp, offset, libc::SEEK_SET);
         libc::fread(user.as_mut_ptr().cast(), Self::Model::SIZE, 1, self.db_fp);
