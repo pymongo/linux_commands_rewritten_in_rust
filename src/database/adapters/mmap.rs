@@ -30,7 +30,7 @@ impl MmapDb {
 
         let mapped_addr = unsafe {
             libc::mmap(
-                std::ptr::null_mut::<libc::c_void>(),
+                std::ptr::null_mut(),
                 Self::MAPPED_BYTES,
                 libc::PROT_READ | libc::PROT_WRITE,
                 // The segment changes are made in the file
@@ -69,6 +69,8 @@ impl CrudUserDao for MmapDb {
             let user = Self::Model::new(user_id as u8);
             (*users)[user_id] = user;
         }
+        // optional if single process: sync mmap change to files
+        libc::msync(self.mapped_addr, Self::MAPPED_BYTES, libc::MS_SYNC);
     }
 
     unsafe fn select_all(&self) -> Vec<Self::Model> {

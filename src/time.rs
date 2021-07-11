@@ -36,7 +36,7 @@ extern "C" {
 /// https://stackoverflow.com/questions/522251/whats-the-difference-between-iso-8601-and-rfc-3339-date-formats
 const RFC_3339_EXAMPLE: &str = "1970-01-01T00:00:00+0000\0";
 const RFC_3339_LEN: usize = RFC_3339_EXAMPLE.len();
-const RFC_3339_FORMAT: *const i8 = "%Y-%m-%dT%H:%M:%S%z\0".as_ptr().cast();
+const RFC_3339_FORMAT: *const libc::c_char = "%Y-%m-%dT%H:%M:%S%z\0".as_ptr().cast();
 
 /// s must end with nul
 #[cfg(test)]

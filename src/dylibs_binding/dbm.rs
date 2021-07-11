@@ -1,6 +1,9 @@
 use libc::{c_char, c_int};
 
-/** dbm/gdbm: a key-value single file database facilities
+/**
+## dbm/gdbm: a key-value single file database facilities
+My gdbm_compat binding on crates.io: https://crates.io/crates/gdbm_compat
+
 ## 不要链接新版gdbm库
 gdbm的新版跟旧版gdbm_compat完全不兼容
 旧版gdbm_compat的open叫dbm_open，新版
@@ -17,15 +20,17 @@ extern "C" {
         dbm_ptr: *mut dbm_ptr,
         key_datum: datum,
         value_datum: datum,
-        store_mode: libc::c_int,
+        store_mode: c_int,
     ) -> c_int;
     pub fn dbm_fetch(dbm_ptr: *mut dbm_ptr, key_datum: datum) -> datum;
+    /// reset database's cursor to first entry
     pub fn dbm_firstkey(dbm_ptr: *mut dbm_ptr) -> datum;
     pub fn dbm_nextkey(dbm_ptr: *mut dbm_ptr) -> datum;
     #[cfg(test)]
     pub fn dbm_delete(dbm_ptr: *mut dbm_ptr, key_datum: datum) -> c_int;
+    //总共就这些函数，还有两个函数我没绑定
     //fn dbm_error(dbm_ptr: *mut dbm_ptr) -> c_int;
-    //fn dbm_clearerror(dbm_ptr: *mut dbm_ptr) -> c_int;
+    //fn dbm_clearerr(dbm_ptr: *mut dbm_ptr) -> c_int;
 }
 
 /// store_mode arg of dbm_store
