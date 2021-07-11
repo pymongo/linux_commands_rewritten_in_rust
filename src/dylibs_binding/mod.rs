@@ -1,2 +1,3 @@
 pub mod curses;
-pub mod dbm;
+pub mod gdbm_compat;
+pub mod mysqlclient;

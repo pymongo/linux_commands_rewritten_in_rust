@@ -20,7 +20,7 @@ unsafe fn curses_hello_world() {
     move_(10, 15);
     printw("Hello World\0".as_ptr().cast());
     refresh();
-    libc::sleep(2);
+    libc::sleep(1);
     endwin();
     libc::exit(libc::EXIT_SUCCESS);
 }

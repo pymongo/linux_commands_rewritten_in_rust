@@ -11,5 +11,6 @@ Model层: 数据模型的定义和序列化
 DAO: 数据模型的读写需求
 service层: 处理业务
 */
-mod adapters;
+pub mod adapters;
+pub mod database_config;
 mod models;

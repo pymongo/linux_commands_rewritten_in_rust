@@ -13,7 +13,6 @@ gdbm的新版跟旧版gdbm_compat完全不兼容
 extern "C" {
     pub type dbm_ptr;
     /// 注意filename参数文件名不要带后缀名，dbm会自动创建基于输入文件名.dir和.pag后缀的两个文件
-    #[cfg(test)]
     pub fn dbm_open(filename: *const c_char, flags: c_int, mode: libc::mode_t) -> *mut dbm_ptr;
     pub fn dbm_close(dbm_ptr: *mut dbm_ptr);
     pub fn dbm_store(
@@ -26,11 +25,11 @@ extern "C" {
     /// reset database's cursor to first entry
     pub fn dbm_firstkey(dbm_ptr: *mut dbm_ptr) -> datum;
     pub fn dbm_nextkey(dbm_ptr: *mut dbm_ptr) -> datum;
-    #[cfg(test)]
     pub fn dbm_delete(dbm_ptr: *mut dbm_ptr, key_datum: datum) -> c_int;
-    //总共就这些函数，还有两个函数我没绑定
-    //fn dbm_error(dbm_ptr: *mut dbm_ptr) -> c_int;
-    //fn dbm_clearerr(dbm_ptr: *mut dbm_ptr) -> c_int;
+    /// unused
+    pub fn dbm_error(dbm_ptr: *mut dbm_ptr) -> c_int;
+    /// unused
+    pub fn dbm_clearerr(dbm_ptr: *mut dbm_ptr) -> c_int;
 }
 
 /// store_mode arg of dbm_store

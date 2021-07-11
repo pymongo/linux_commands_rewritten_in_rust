@@ -1,16 +1,14 @@
 use crate::database::models::user::{CrudUserDao, User, Username};
-use crate::dylibs_binding::dbm::{
-    datum, dbm_close, dbm_fetch, dbm_firstkey, dbm_nextkey, dbm_ptr, dbm_store, StoreMode,
+use crate::dylibs_binding::gdbm_compat::{
+    datum, dbm_close, dbm_fetch, dbm_firstkey, dbm_nextkey, dbm_open, dbm_ptr, dbm_store, StoreMode,
 };
 
-struct DbmDb {
+pub struct DbmDb {
     dbm_ptr: *mut dbm_ptr,
 }
 
-impl DbmDb {
-    #[cfg(test)]
-    fn new() -> Self {
-        use crate::dylibs_binding::dbm::dbm_open;
+impl Default for DbmDb {
+    fn default() -> Self {
         let dbm_ptr = unsafe {
             dbm_open(
                 Self::DB_FILENAME,
@@ -29,7 +27,6 @@ impl Drop for DbmDb {
     #[allow(clippy::shadow_unrelated)]
     fn drop(&mut self) {
         unsafe {
-            dbg!(self.dbm_ptr.is_null());
             dbm_close(self.dbm_ptr);
             // python: os.path.basename, Rust: file_stem
             let file_stem = libc::strdup(Self::DB_FILENAME);
@@ -136,14 +133,14 @@ impl CrudUserDao for DbmDb {
 
 #[test]
 fn test_dbm_database() {
-    let db_adapter = DbmDb::new();
+    let db_adapter = DbmDb::default();
     crate::database::models::user::test_user_crud(&db_adapter);
 }
 
 #[cfg(test)]
 unsafe fn dbm_create_read_update_delete() {
-    use crate::dylibs_binding::dbm::dbm_delete;
-    let handle = DbmDb::new();
+    use crate::dylibs_binding::gdbm_compat::dbm_delete;
+    let handle = DbmDb::default();
 
     let mut key = 1;
     let mut user = User::new(key);

@@ -73,8 +73,8 @@ TODO
     clippy::cast_possible_truncation
 )]
 
-mod database;
-mod dylibs_binding;
+pub mod database;
+pub mod dylibs_binding;
 pub mod errno;
 pub mod file_system;
 pub mod time;

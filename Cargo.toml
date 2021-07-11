@@ -4,4 +4,7 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-libc = "*"
+libc = "0.2"
+# toml and serde is only used to read database config file
+toml = "0.5"
+serde = { version="1.0", features=["derive"] }
