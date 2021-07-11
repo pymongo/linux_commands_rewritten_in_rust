@@ -28,7 +28,9 @@ int main(int argc, char *argv[]) {
 #[link(name = "mysqlclient")]
 extern "C" {
     pub type mysql;
-    pub fn mysql_init(handle: *mut mysql) -> *mut mysql;
+    pub fn mysql_errno(connection: *mut mysql) -> c_uint;
+    pub fn mysql_error(connection: *mut mysql) -> *const c_char;
+    pub fn mysql_init(connection: *mut mysql) -> *mut mysql;
     pub fn mysql_real_connect(
         connection: *mut mysql,
         server_host: *const c_char,

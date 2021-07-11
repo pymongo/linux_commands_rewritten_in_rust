@@ -1,8 +1,10 @@
 ## cargo test must run in **single thread**
 
-first you need to copy config file and edit it(eg. your mysql password):
+To run database test you need to copy config file and edit it(eg. your mysql password):
 
 > cp database_config.toml.example database_config.toml && vim database_config.toml
+
+this config is only for mysql testing, run commands in src/bin doesn't need this
 
 because multi database adapters test is using a **same file** to store data
 
