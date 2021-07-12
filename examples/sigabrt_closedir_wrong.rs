@@ -1,6 +1,7 @@
 /*!
 SIGABRT 的可能原因:
 - double free, example: `closedir(dirp);closedir(dirp);`
+- 尝试free非进程内存分配器管理的内存: 例如Rust进程free mysql动态链接库的static变量内存(mysql_fetch_row的返回值)
 
 ## 避免 double free 的编码习惯
 

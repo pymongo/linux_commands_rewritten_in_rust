@@ -1,3 +1,5 @@
+use std::convert::TryInto;
+
 pub type Username = [u8; 7];
 
 /// 只要结构体的各个字段都是栈上内存，没有指针，就无需序列化(保证内存对齐跟C一样)也能读写进文件中
@@ -6,7 +8,7 @@ pub type Username = [u8; 7];
 pub struct User {
     /// user_id from 0 to 9
     pub user_id: u8,
-    /// string bytes without nul terminator
+    /// string bytes without nul terminator, username is lowercase letter, can't contains comma
     pub username: Username,
 }
 
@@ -18,6 +20,18 @@ impl std::fmt::Debug for User {
                 String::from_utf8_unchecked(self.username.to_vec())
             })
             .finish()
+    }
+}
+
+impl std::str::FromStr for User {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, ()> {
+        let (user_id_str, username_str) = s.split_once(",").unwrap();
+        Ok(Self {
+            user_id: user_id_str.parse().unwrap(),
+            username: username_str.as_bytes().try_into().unwrap(),
+        })
     }
 }
 

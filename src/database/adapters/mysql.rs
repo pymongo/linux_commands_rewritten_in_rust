@@ -1,8 +1,9 @@
 use crate::database::database_config::MysqlConfig;
 use crate::database::models::user::{CrudUserDao, User, Username};
 use crate::dylibs_binding::mysqlclient::{
-    my_ulonglong, mysql, mysql_affected_rows, mysql_close, mysql_errno, mysql_error, mysql_init,
-    mysql_ping, mysql_query, mysql_real_connect, MYSQL_DEFAULT_PORT,
+    my_ulonglong, mysql, mysql_affected_rows, mysql_close, mysql_errno, mysql_error,
+    mysql_fetch_row, mysql_field_count, mysql_free_result, mysql_init, mysql_num_rows, mysql_ping,
+    mysql_query, mysql_real_connect, mysql_store_result, MYSQL_DEFAULT_PORT,
 };
 use std::ffi::CString;
 
@@ -60,22 +61,87 @@ impl MysqlConnection {
                 mysql_errno(self.connection),
                 mysql_error(self.connection),
             );
-            libc::exit(1);
+            libc::exit(libc::EXIT_FAILURE);
         }
     }
 
     /// sql string without nul byte
-    pub fn query(&self, sql: &str) {
+    #[allow(clippy::must_use_candidate)]
+    pub fn query<T: std::str::FromStr>(&self, sql: &str) -> Option<Vec<T>> {
+        let is_select_statement = sql.contains("select") || sql.contains("SELECT");
         let sql = CString::new(sql).unwrap();
         let ret = unsafe { mysql_query(self.connection, sql.as_ptr().cast()) };
         if ret != 0 {
             self.print_last_mysql_error_and_exit();
         }
+        // only select statement has return value
+        if !is_select_statement {
+            return None;
+        }
+
+        let res_ptr = unsafe { mysql_store_result(self.connection) };
+        if res_ptr.is_null() {
+            self.print_last_mysql_error_and_exit();
+        }
+
+        let num_rows = unsafe { mysql_num_rows(res_ptr) } as usize;
+        let mut records = vec![];
+        // loop times is mysql_num_rows()
+        loop {
+            // type of sql_row is Vec<Vec<u8>>
+            let sql_row = unsafe { mysql_fetch_row(res_ptr) };
+            if sql_row.is_null() {
+                break;
+            }
+
+            // csv format in string
+            let mut row_bytes = Vec::<u8>::new();
+
+            let fields = unsafe { mysql_field_count(self.connection) };
+            for index in 0..fields {
+                let field_str = unsafe {
+                    // copy strdup bytes from mysql dylib
+                    // or `Vec::from_raw_parts` and mem::forget
+                    // when from_raw_parts drop, would dealloc bytes in mysql dylib cause memory error, must manual forget to drop
+                    // let bytes = *sql_row.add(index as usize);
+                    let bytes = libc::strdup(*sql_row.add(index as usize));
+                    let bytes_len = libc::strlen(bytes);
+                    String::from_raw_parts(bytes.cast(), bytes_len, bytes_len)
+                };
+                row_bytes.extend(field_str.into_bytes());
+                row_bytes.push(b',');
+            }
+
+            if !row_bytes.is_empty() {
+                // pop last comma
+                row_bytes.pop().unwrap();
+                let row_str = unsafe { String::from_utf8_unchecked(row_bytes) };
+                #[allow(clippy::match_wild_err_arm)]
+                let record = match row_str.parse::<T>() {
+                    Ok(record) => record,
+                    Err(_) => panic!("parse error"),
+                };
+                records.push(record);
+            }
+        }
+        unsafe {
+            mysql_free_result(res_ptr);
+        }
+        assert_eq!(records.len(), num_rows);
+        Some(records)
     }
 
     /// if delete the whole tables, the affected rows would be zero
+    #[must_use]
     pub fn affected_rows(&self) -> my_ulonglong {
         unsafe { mysql_affected_rows(self.connection) }
+    }
+
+    /// last_insert_id in current connection(current thread?)
+    #[must_use]
+    pub fn last_insert_id(&self) -> libc::c_ulong {
+        self.query::<libc::c_ulong>("select last_insert_id()")
+            .unwrap()[0]
     }
 }
 
@@ -126,8 +192,8 @@ impl CrudUserDao for MysqlConnection {
     type Model = User;
 
     unsafe fn insert_sample_data(&self) {
-        self.query("drop table if exists users");
-        self.query("create table if not exists users(user_id tinyint unsigned not null primary key, username varchar(7) not null)");
+        self.query::<bool>("drop table if exists users");
+        self.query::<bool>("create table if not exists users(user_id tinyint unsigned not null primary key, username varchar(7) not null)");
         for user_id in 0..Self::Model::LEN {
             let user_id = user_id as u8;
             let user = Self::Model::new(user_id);
@@ -137,17 +203,23 @@ impl CrudUserDao for MysqlConnection {
                 "insert into users(user_id, username) values({}, '{}')",
                 user.user_id, username
             );
-            self.query(&insert_sql);
+            self.query::<bool>(&insert_sql);
             assert_eq!(self.affected_rows(), 1);
+            // because our user_id is set manual, and not AUTO_INCREMENT
+            // so last_insert_id() would be zero after insert(because last insert id not using AUTO_INCREMENT)
         }
     }
 
     unsafe fn select_all(&self) -> Vec<Self::Model> {
-        todo!()
+        self.query("select user_id, username from users").unwrap()
     }
 
     unsafe fn find_user_by_id(&self, user_id: u8) -> Self::Model {
-        todo!()
+        let sql = format!(
+            "select user_id, username from users where user_id={}",
+            user_id
+        );
+        self.query(&sql).unwrap()[0]
     }
 
     unsafe fn update_username_by_id(&self, user_id: u8, username: Username) {
@@ -157,7 +229,7 @@ impl CrudUserDao for MysqlConnection {
             "update users set username='{}' where user_id={}",
             username, user_id
         );
-        self.query(&insert_sql);
+        self.query::<bool>(&insert_sql);
         if self.affected_rows() == 0 {
             panic!("user_id={} not found", user_id);
         }
@@ -181,4 +253,38 @@ fn test_update_username_by_id() {
         mysql_conn.insert_sample_data();
         mysql_conn.update_username_by_id(3, *b"tuesday");
     }
+}
+
+#[test]
+fn test_query_with_generic() {
+    let config = crate::database::database_config::Config::default();
+    let mysql_conn = MysqlConnection::new(config.mysql);
+    unsafe {
+        mysql_conn.insert_sample_data();
+    }
+    let user_id = mysql_conn
+        .query::<u8>(
+            "\
+            SELECT user_id \
+            FROM users \
+            WHERE username='user_01'",
+        )
+        .unwrap()[0];
+    assert_eq!(user_id, 1);
+    let user = mysql_conn
+        .query::<User>(
+            "\
+            SELECT user_id, username \
+            FROM users \
+            WHERE username='user_01'",
+        )
+        .unwrap()[0];
+    assert_eq!(user.user_id, 1);
+}
+
+#[test]
+fn test_mysql_database() {
+    let config = crate::database::database_config::Config::default();
+    let db_adapter = MysqlConnection::new(config.mysql);
+    crate::database::models::user::test_user_crud(&db_adapter);
 }
