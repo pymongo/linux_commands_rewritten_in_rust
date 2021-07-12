@@ -86,7 +86,6 @@ impl CrudUserDao for DbmDb {
     }
 
     unsafe fn find_user_by_id(&self, mut user_id: u8) -> Self::Model {
-        assert!(User::user_id_is_valid(user_id));
         let key_datum = datum {
             dptr: (&mut user_id as *mut u8).cast(),
             dsize: std::mem::size_of_val(&user_id) as i32,
@@ -94,19 +93,17 @@ impl CrudUserDao for DbmDb {
         let value_datum = dbm_fetch(self.dbm_ptr, key_datum);
         if value_datum.dptr.is_null() {
             panic!("user_id={} not found!", user_id);
-        } else {
-            let mut user = std::mem::zeroed::<User>();
-            std::ptr::copy(
-                value_datum.dptr.cast(),
-                user.as_mut_ptr(),
-                value_datum.dsize as usize,
-            );
-            user
         }
+        let mut user = std::mem::zeroed::<User>();
+        std::ptr::copy(
+            value_datum.dptr.cast(),
+            user.as_mut_ptr(),
+            value_datum.dsize as usize,
+        );
+        user
     }
 
     unsafe fn update_username_by_id(&self, mut user_id: u8, username: Username) {
-        assert!(User::user_id_is_valid(user_id));
         let key_datum = datum {
             dptr: (&mut user_id as *mut u8).cast(),
             dsize: std::mem::size_of_val(&user_id) as i32,
@@ -114,20 +111,19 @@ impl CrudUserDao for DbmDb {
         let mut value_datum = dbm_fetch(self.dbm_ptr, key_datum);
         if value_datum.dptr.is_null() {
             panic!("user_id={} not found!", user_id);
-        } else {
-            let mut user = std::mem::zeroed::<User>();
-            std::ptr::copy(
-                value_datum.dptr.cast(),
-                user.as_mut_ptr(),
-                value_datum.dsize as usize,
-            );
-            user.username = username;
-            value_datum.dptr = user.as_mut_ptr().cast();
-            assert_eq!(
-                dbm_store(self.dbm_ptr, key_datum, value_datum, StoreMode::DBM_REPLACE),
-                0
-            );
         }
+        let mut user = std::mem::zeroed::<User>();
+        std::ptr::copy(
+            value_datum.dptr.cast(),
+            user.as_mut_ptr(),
+            value_datum.dsize as usize,
+        );
+        user.username = username;
+        value_datum.dptr = user.as_mut_ptr().cast();
+        assert_eq!(
+            dbm_store(self.dbm_ptr, key_datum, value_datum, StoreMode::DBM_REPLACE),
+            0
+        );
     }
 }
 

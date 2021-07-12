@@ -1,7 +1,8 @@
 use crate::database::database_config::MysqlConfig;
+use crate::database::models::user::{CrudUserDao, User, Username};
 use crate::dylibs_binding::mysqlclient::{
-    mysql, mysql_close, mysql_errno, mysql_error, mysql_init, mysql_ping, mysql_real_connect,
-    MYSQL_DEFAULT_PORT,
+    my_ulonglong, mysql, mysql_affected_rows, mysql_close, mysql_errno, mysql_error, mysql_init,
+    mysql_ping, mysql_query, mysql_real_connect, MYSQL_DEFAULT_PORT,
 };
 use std::ffi::CString;
 
@@ -62,6 +63,20 @@ impl MysqlConnection {
             libc::exit(1);
         }
     }
+
+    /// sql string without nul byte
+    pub fn query(&self, sql: &str) {
+        let sql = CString::new(sql).unwrap();
+        let ret = unsafe { mysql_query(self.connection, sql.as_ptr().cast()) };
+        if ret != 0 {
+            self.print_last_mysql_error_and_exit();
+        }
+    }
+
+    /// if delete the whole tables, the affected rows would be zero
+    pub fn affected_rows(&self) -> my_ulonglong {
+        unsafe { mysql_affected_rows(self.connection) }
+    }
 }
 
 impl Drop for MysqlConnection {
@@ -104,5 +119,66 @@ fn test_error_mysql_server_has_gone() {
             mysql_errno(connection),
             mysql_error(connection),
         );
+    }
+}
+
+impl CrudUserDao for MysqlConnection {
+    type Model = User;
+
+    unsafe fn insert_sample_data(&self) {
+        self.query("drop table if exists users");
+        self.query("create table if not exists users(user_id tinyint unsigned not null primary key, username varchar(7) not null)");
+        for user_id in 0..Self::Model::LEN {
+            let user_id = user_id as u8;
+            let user = Self::Model::new(user_id);
+            let username = String::from_utf8_unchecked(user.username.to_vec());
+            // use prepare statement to insert is better
+            let insert_sql = format!(
+                "insert into users(user_id, username) values({}, '{}')",
+                user.user_id, username
+            );
+            self.query(&insert_sql);
+            assert_eq!(self.affected_rows(), 1);
+        }
+    }
+
+    unsafe fn select_all(&self) -> Vec<Self::Model> {
+        todo!()
+    }
+
+    unsafe fn find_user_by_id(&self, user_id: u8) -> Self::Model {
+        todo!()
+    }
+
+    unsafe fn update_username_by_id(&self, user_id: u8, username: Username) {
+        let username = String::from_utf8_unchecked(username.to_vec());
+        // use prepare statement to update is better
+        let insert_sql = format!(
+            "update users set username='{}' where user_id={}",
+            username, user_id
+        );
+        self.query(&insert_sql);
+        if self.affected_rows() == 0 {
+            panic!("user_id={} not found", user_id);
+        }
+    }
+}
+
+#[test]
+fn test_insert_sample_data() {
+    let config = crate::database::database_config::Config::default();
+    let mysql_conn = MysqlConnection::new(config.mysql);
+    unsafe {
+        mysql_conn.insert_sample_data();
+    }
+}
+
+#[test]
+fn test_update_username_by_id() {
+    let config = crate::database::database_config::Config::default();
+    let mysql_conn = MysqlConnection::new(config.mysql);
+    unsafe {
+        mysql_conn.insert_sample_data();
+        mysql_conn.update_username_by_id(3, *b"tuesday");
     }
 }

@@ -28,6 +28,7 @@ int main(int argc, char *argv[]) {
 #[link(name = "mysqlclient")]
 extern "C" {
     pub type mysql;
+    /// mysql function return 0 or not_null means no error
     pub fn mysql_errno(connection: *mut mysql) -> c_uint;
     pub fn mysql_error(connection: *mut mysql) -> *const c_char;
     pub fn mysql_init(connection: *mut mysql) -> *mut mysql;
@@ -44,6 +45,13 @@ extern "C" {
     pub fn mysql_close(connection: *mut mysql);
     /// return 0 if ping success
     pub fn mysql_ping(connection: *mut mysql) -> c_int;
+    /// query arg with no terminating semicolon, query SQL statement's line break is `\`
+    pub fn mysql_query(connection: *mut mysql, query: *const c_char) -> c_int;
+    /// returns the number of rows affected by the UPDATE, INSERT, or DELETE query
+    pub fn mysql_affected_rows(connection: *mut mysql) -> my_ulonglong;
 }
 
 pub const MYSQL_DEFAULT_PORT: c_uint = 0;
+
+#[allow(non_camel_case_types)]
+pub type my_ulonglong = libc::c_ulonglong;

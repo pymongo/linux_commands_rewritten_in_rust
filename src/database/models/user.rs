@@ -49,6 +49,7 @@ impl User {
         self as *mut Self
     }
 
+    /// only stdio's fread/fwrite and mmap need calc user_id by offset, so it want user_id is in range [0..=9]
     pub const fn user_id_is_valid(user_id: u8) -> bool {
         user_id < Self::LEN as u8
     }
