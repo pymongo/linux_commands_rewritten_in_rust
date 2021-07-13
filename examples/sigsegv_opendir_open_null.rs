@@ -6,6 +6,7 @@ process try to access memory it doesn't own
 
 ## SIGSEGV 的可能原因:
 - dereference NULL or invalid_address, eg. readdir(NULL)
+- stack overflow
 - use-after-free(danling pointers): access de-allocated memory
 - using uninitialized pointer
 - access memory process doesn't own, eg. index out of range

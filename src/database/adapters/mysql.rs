@@ -100,11 +100,27 @@ impl MysqlConnection {
             let fields = unsafe { mysql_field_count(self.connection) };
             for index in 0..fields {
                 let field_str = unsafe {
+                    /*
+                    Reference: BLP aka *beginning linux programming 4th edition*
+                    BLP page 284(pdf_317):
+                    > (note for dbm_fetch)
+                    >
+                    > The actual data may still be held in local storage space inside the dbm library
+                    >
+                    > and must be copied into program variables before any further dbm functions are called
+
+                    BLP page 431(pdf_374):
+                    > mysql_error, which provides a meaningful text message instead.
+                    >
+                    > The message text is written to some internal static memory space,
+                    >
+                    > so you need tocopy it elsewhere if you want to save the error text
+                    */
                     // copy strdup bytes from mysql dylib
                     // or `Vec::from_raw_parts` and mem::forget
                     // when from_raw_parts drop, would dealloc bytes in mysql dylib cause memory error, must manual forget to drop
                     // let bytes = *sql_row.add(index as usize);
-                    let bytes = libc::strdup(*sql_row.add(index as usize));
+                    let bytes = libc::strdup(*sql_row.add(index as usize)); // or strcpy, or std::ptr::copy
                     let bytes_len = libc::strlen(bytes);
                     String::from_raw_parts(bytes.cast(), bytes_len, bytes_len)
                 };
@@ -115,6 +131,7 @@ impl MysqlConnection {
             if !row_bytes.is_empty() {
                 // pop last comma
                 row_bytes.pop().unwrap();
+                // BLP 书上例子是用 sscanf 解析每一个字段的值
                 let row_str = unsafe { String::from_utf8_unchecked(row_bytes) };
                 #[allow(clippy::match_wild_err_arm)]
                 let record = match row_str.parse::<T>() {

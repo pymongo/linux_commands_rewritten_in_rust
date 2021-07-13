@@ -66,6 +66,7 @@ extern "C" {
     pub fn mysql_fetch_row(res_ptr: *mut mysql_res) -> MysqlRow;
     /// unsigned int STDCALL mysql_field_count(MYSQL *mysql);
     pub fn mysql_field_count(connection: *mut mysql) -> libc::c_ulong;
+    // pub fn mysql_real_escape_string_quote()
 }
 
 #[allow(non_camel_case_types)]
