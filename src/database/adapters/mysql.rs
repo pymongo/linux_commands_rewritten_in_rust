@@ -182,7 +182,7 @@ Time                Id Command  Argument
 */
 #[test]
 fn test_mysql_connect_and_ping() {
-    let config = crate::database::database_config::Config::default();
+    let config = crate::database::database_config::Config::load_production_config();
     let mysql_conn = MysqlConnection::new(config.mysql);
     assert!(mysql_conn.ping());
 }
@@ -255,7 +255,7 @@ impl CrudUserDao for MysqlConnection {
 
 #[test]
 fn test_insert_sample_data() {
-    let config = crate::database::database_config::Config::default();
+    let config = crate::database::database_config::Config::load_production_config();
     let mysql_conn = MysqlConnection::new(config.mysql);
     unsafe {
         mysql_conn.insert_sample_data();
@@ -264,7 +264,7 @@ fn test_insert_sample_data() {
 
 #[test]
 fn test_update_username_by_id() {
-    let config = crate::database::database_config::Config::default();
+    let config = crate::database::database_config::Config::load_production_config();
     let mysql_conn = MysqlConnection::new(config.mysql);
     unsafe {
         mysql_conn.insert_sample_data();
@@ -274,7 +274,7 @@ fn test_update_username_by_id() {
 
 #[test]
 fn test_query_with_generic() {
-    let config = crate::database::database_config::Config::default();
+    let config = crate::database::database_config::Config::load_production_config();
     let mysql_conn = MysqlConnection::new(config.mysql);
     unsafe {
         mysql_conn.insert_sample_data();
@@ -301,7 +301,7 @@ fn test_query_with_generic() {
 
 #[test]
 fn test_mysql_database() {
-    let config = crate::database::database_config::Config::default();
+    let config = crate::database::database_config::Config::load_production_config();
     let db_adapter = MysqlConnection::new(config.mysql);
     crate::database::models::user::test_user_crud(&db_adapter);
 }

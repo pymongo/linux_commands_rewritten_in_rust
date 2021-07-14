@@ -50,7 +50,8 @@ unsafe fn parse_rfc_3339_to_tm(s: &str) -> libc::tm {
     tm
 }
 
-fn tm_to_rfc_3339(tm: &libc::tm) -> String {
+#[must_use]
+pub fn tm_to_rfc_3339(tm: &libc::tm) -> String {
     let mut buffer = [0_u8; RFC_3339_LEN];
     let str_len = unsafe {
         strftime(
