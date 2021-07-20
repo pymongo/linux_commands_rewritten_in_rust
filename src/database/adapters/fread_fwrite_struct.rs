@@ -45,6 +45,7 @@ impl CrudUserDao for FreadFwriteDb {
     unsafe fn insert_sample_data(&self) {
         for user_id in 0..Self::Model::LEN {
             let user = Self::Model::new(user_id as u8);
+            // read/write 系统调用其实也可以读写(序列化)一个结构体
             libc::fwrite(user.as_ptr().cast(), Self::Model::SIZE, 1, self.db_fp);
         }
     }

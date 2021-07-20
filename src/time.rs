@@ -105,7 +105,9 @@ pub fn format_timestamp_with_nanosecond(
     unsafe {
         libc::localtime_r(&timestamp, &mut tm);
     }
-    let ymd_hms = tm_to_rfc_3339(&tm);
+    let mut ymd_hms = tm_to_rfc_3339(&tm).into_bytes();
+    ymd_hms.truncate(ymd_hms.len() - "+0800".len());
+    let ymd_hms = unsafe { String::from_utf8_unchecked(ymd_hms) };
     let timezone = tm.tm_gmtoff / 3600 + if tm.tm_isdst > 0 { 1 } else { 0 };
     format!("{}.{} {:+03}00", ymd_hms, nanosecond, timezone)
 }
@@ -115,7 +117,7 @@ fn test_format_timestamp_with_nanosecond() {
     const TEST_CASES: [(libc::time_t, libc::time_t, &str); 1] = [(
         1_625_277_279,
         444_706_875,
-        "2021-07-03 09:54:39.444706875 +0800",
+        "2021-07-03T09:54:39.444706875 +0800",
     )];
     for (timestamp, nanosecond, output) in TEST_CASES {
         assert_eq!(
@@ -132,6 +134,7 @@ fn test_format_timestamp_with_nanosecond() {
 */
 #[test]
 fn test_asctime_and_ctime() {
+    #[link(name = "c")]
     extern "C" {
         /// asctime include `\n`
         fn asctime(tm: *const libc::tm) -> *const libc::c_char;

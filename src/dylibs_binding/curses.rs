@@ -26,6 +26,7 @@ unsafe fn curses_hello_world() {
 }
 
 #[test]
+#[ignore = "would mess up terminal display"]
 fn run_curses_hello_world() {
     unsafe {
         curses_hello_world();

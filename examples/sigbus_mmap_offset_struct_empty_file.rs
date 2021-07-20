@@ -4,9 +4,7 @@ access memory beyond the physically address
 
 ## SIGBUS 的可能原因:
 - mmap空文件后，读取偏移为10的数据显然超出"物理内存范围"，因为mmap是基于磁盘文件的数据，如果磁盘文件的大小为0，那么映射成的物理内存长度只能是0
-
 */
-
 #[derive(Clone, Copy)]
 #[repr(C)]
 struct Byte(u8);

@@ -43,6 +43,7 @@ dirp = std::ptr::null_mut();
 
 Rust 申请内存时发现当前进程居然有几块 double free 的内存，为了避免错误进一步扩散，就报错 SIGABRT
 */
+
 fn main() {
     let dir_name = "/\0";
     let dir_name_cstr = dir_name.as_ptr().cast();

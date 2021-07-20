@@ -17,3 +17,6 @@ or
 ## known issue on nightly-armv7-unknown-linux-gnueabihf
 
 - database::adapters::dbm  may double-free or malloc corrupted
+
+## reference:
+- <https://gitlab.redox-os.org/redox-os/relibc>

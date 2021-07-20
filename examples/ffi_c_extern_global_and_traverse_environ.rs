@@ -1,8 +1,4 @@
-#[link(name = "readline")]
-extern "C" {
-    static rl_readline_version: libc::c_int;
-}
-
+#![warn(clippy::nursery, clippy::pedantic)]
 #[link(name = "c")]
 extern "C" {
     /// extern char **environ;
@@ -21,7 +17,7 @@ unsafe fn traverse_env_vars() {
 
 fn main() {
     println!("version of `libreadline.so` = {}", unsafe {
-        rl_readline_version
+        linux_commands_rewritten_in_rust::dylibs_binding::readline::rl_readline_version
     });
     unsafe {
         traverse_env_vars();
