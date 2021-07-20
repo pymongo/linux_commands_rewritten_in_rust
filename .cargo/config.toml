@@ -1,2 +1,2 @@
 [build]
-rustflags=["-Zinstrument-mcount"]
+#rustflags=["-Zinstrument-mcount"]

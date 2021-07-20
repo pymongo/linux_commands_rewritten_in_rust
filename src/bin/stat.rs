@@ -1,4 +1,3 @@
-//! stat (GNU coreutils)
 #![warn(clippy::nursery, clippy::pedantic)]
 use linux_commands_rewritten_in_rust::time::format_timestamp_with_nanosecond;
 

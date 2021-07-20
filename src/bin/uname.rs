@@ -1,4 +1,3 @@
-//! uname (GNU coreutils)
 #![warn(clippy::nursery, clippy::pedantic)]
 
 fn main() {

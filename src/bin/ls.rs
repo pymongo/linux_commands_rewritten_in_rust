@@ -1,4 +1,3 @@
-//! ls (GNU coreutils)
 #![warn(clippy::nursery, clippy::pedantic)]
 
 fn main() {
@@ -22,14 +21,9 @@ fn main() {
             // directory_entries iterator end
             break;
         }
-        let filename_str = unsafe {
+        unsafe {
             let dir_entry = *dir_entry;
-            let filename_len = libc::strlen(dir_entry.d_name.as_ptr());
-            //let filename_bytes = std::mem::transmute::<&[i8], &[u8]>(&dir_entry.d_name[..filename_len]);
-            let filename_bytes =
-                &*(&dir_entry.d_name[..filename_len] as *const [libc::c_char] as *const [u8]);
-            String::from_utf8_unchecked(filename_bytes.to_owned())
-        };
-        println!("{}", filename_str);
+            libc::printf("%s\n\0".as_ptr().cast(), dir_entry.d_name);
+        }
     }
 }

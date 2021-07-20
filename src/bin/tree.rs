@@ -1,6 +1,8 @@
-//! tree <https://archlinux.org/packages/extra/x86_64/tree/>
 #![warn(clippy::nursery, clippy::pedantic)]
 
+/**
+run 100 tims calc mean run time: perf stat -r 100 ./target/debug/tree
+*/
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();
     let input_filename = if let Some(filename) = args.get(1) {
@@ -25,6 +27,8 @@ fn main() {
     }
 }
 
+const NAME_MAX: usize = 255;
+
 unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
     loop {
         let dir_entry = libc::readdir(dirp);
@@ -47,19 +51,21 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
         if stat_ret == -1 {
             panic!("{}", std::io::Error::last_os_error());
         }
-        let is_dir = stat_buf.st_mode & libc::S_IFMT == libc::S_IFDIR;
+        let is_dir = (stat_buf.st_mode & libc::S_IFMT) == libc::S_IFDIR;
 
         // convert filename from [c_char; 256] to String
-        let filename_len = libc::strlen(filename_cstr);
-        let filename_bytes =
-            &*(&dir_entry.d_name[..filename_len] as *const [libc::c_char] as *const [u8]);
-        let filename_string = String::from_utf8_unchecked(filename_bytes.to_owned());
+        let filename_string = String::from_raw_parts(
+            (filename_cstr as *mut i8).cast(),
+            libc::strlen(filename_cstr),
+            NAME_MAX,
+        );
         println!(
             "{}{}{}",
             " ".repeat(indent),
             filename_string,
             if is_dir { "/" } else { "" }
         );
+        std::mem::forget(filename_string);
 
         if is_dir {
             // backtracking: opendir<->closedir, chdir(filename_cstr)<->chdir("..\0")

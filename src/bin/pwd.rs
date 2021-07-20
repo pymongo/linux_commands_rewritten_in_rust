@@ -1,5 +1,4 @@
-//! pwd: shell built-in command
-
+#![warn(clippy::nursery, clippy::pedantic)]
 fn main() {
     println!(
         "{}",

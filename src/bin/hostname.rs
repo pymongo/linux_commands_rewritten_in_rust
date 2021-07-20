@@ -1,4 +1,3 @@
-//! hostname (GNU inetutils)
 #![warn(clippy::nursery, clippy::pedantic)]
 
 fn main() {
