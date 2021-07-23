@@ -4,6 +4,7 @@ extern "C" {
     fn MD5(input: *const u8, input_len: usize, output: &mut [u8; 16]) -> *mut u8;
 }
 
+#[must_use]
 pub fn openssl_md5(input: &[u8]) -> String {
     let mut output = [0_u8; 16];
     unsafe {

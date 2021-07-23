@@ -5,18 +5,14 @@
 - mmap空文件后，读取偏移为10的数据
 - unimplemented instructions
 */
+use linux_commands_rewritten_in_rust::syscall;
 fn main() {
     const LEN: usize = 10;
-    let fd = unsafe {
-        libc::open(
-            "/tmp/my_mmap_data\0".as_ptr().cast(),
-            libc::O_RDWR | libc::O_CREAT,
-            libc::S_IRUSR | libc::S_IWUSR,
-        )
-    };
-    if fd == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
+    let fd = syscall!(open(
+        "/tmp/my_mmap_data\0".as_ptr().cast(),
+        libc::O_RDWR | libc::O_CREAT,
+        libc::S_IRUSR | libc::S_IWUSR,
+    ));
     // How to Fix: libc::write(fd, [0_u8; 10].as_ptr().cast(), 10);
     let mapped_addr = unsafe {
         libc::mmap(
@@ -37,8 +33,5 @@ fn main() {
     }
     // Bug is here: read offset 10 to a empty file
     let _data = unsafe { *mapped_addr.cast::<[u8; LEN]>() };
-    let ret = unsafe { libc::munmap(mapped_addr, LEN) };
-    if ret == -1 {
-        panic!("{}", std::io::Error::last_os_error());
-    }
+    syscall!(munmap(mapped_addr, LEN));
 }

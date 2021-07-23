@@ -1,6 +1,5 @@
 #![warn(clippy::nursery, clippy::pedantic)]
-
-use linux_commands_rewritten_in_rust::errno::last_errno_message;
+use linux_commands_rewritten_in_rust::syscall;
 
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();
@@ -19,8 +18,5 @@ fn main() {
 
     let permission = (user_permission << 6) | (group_permission << 3) | other_permission;
     let filename = std::ffi::CString::new(args[2].as_bytes()).unwrap();
-    let ret = unsafe { libc::chmod(filename.as_ptr(), permission) };
-    if ret == -1 {
-        eprintln!("{}", last_errno_message());
-    }
+    syscall!(chmod(filename.as_ptr(), permission));
 }

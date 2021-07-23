@@ -18,10 +18,7 @@ impl FreadFwriteDb {
 
 impl Drop for FreadFwriteDb {
     fn drop(&mut self) {
-        let close_ret = unsafe { libc::fclose(self.db_fp) };
-        if close_ret == -1 {
-            panic!("{}", std::io::Error::last_os_error());
-        }
+        crate::syscall!(fclose(self.db_fp));
         unsafe {
             libc::unlink(Self::DB_FILENAME);
         }

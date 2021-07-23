@@ -47,10 +47,8 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
 
         // check file whether a directory
         let mut stat_buf = std::mem::zeroed();
-        let stat_ret = libc::lstat(filename_cstr, &mut stat_buf); // lstat doesn't follow link
-        if stat_ret == -1 {
-            panic!("{}", std::io::Error::last_os_error());
-        }
+        // lstat doesn't follow link
+        linux_commands_rewritten_in_rust::syscall!(lstat(filename_cstr, &mut stat_buf));
         let is_dir = (stat_buf.st_mode & libc::S_IFMT) == libc::S_IFDIR;
 
         // convert filename from [c_char; 256] to String

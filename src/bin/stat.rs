@@ -1,4 +1,5 @@
 #![warn(clippy::nursery, clippy::pedantic)]
+use linux_commands_rewritten_in_rust::syscall;
 use linux_commands_rewritten_in_rust::time::format_timestamp_with_nanosecond;
 
 fn main() {
@@ -25,12 +26,7 @@ fn main() {
 fn my_stat(filename: &str) {
     let filename_with_nul = format!("{}\0", filename);
     let mut file_stat = unsafe { std::mem::zeroed() };
-    let ret = unsafe { libc::stat(filename_with_nul.as_ptr().cast(), &mut file_stat) };
-    if ret == -1 {
-        unsafe {
-            libc::perror(std::ptr::null());
-        }
-    }
+    syscall!(stat(filename_with_nul.as_ptr().cast(), &mut file_stat));
     println!("  File: {}", filename);
     println!(
         "  Size: {:<15} Blocks: {:<10} IO Block: {:<6} {}",

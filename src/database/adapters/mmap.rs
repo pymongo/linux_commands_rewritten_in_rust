@@ -1,4 +1,5 @@
 use crate::database::models::user::{CrudUserDao, User, Username};
+use crate::syscall;
 
 struct MmapDb {
     mapped_addr: *mut libc::c_void,
@@ -9,24 +10,17 @@ impl MmapDb {
         <Self as CrudUserDao>::Model::LEN * <Self as CrudUserDao>::Model::SIZE;
     #[cfg(test)]
     fn new() -> Self {
-        let fd = unsafe {
-            libc::open(
-                Self::DB_FILENAME,
-                libc::O_RDWR | libc::O_CREAT,
-                libc::S_IRUSR | libc::S_IWUSR,
-            )
-        };
-        if fd == -1 {
-            panic!("{}", std::io::Error::last_os_error());
-        }
+        let fd = syscall!(open(
+            Self::DB_FILENAME,
+            libc::O_RDWR | libc::O_CREAT,
+            libc::S_IRUSR | libc::S_IWUSR,
+        ));
         // insert bytes to file to fit the mapped_len required
-        unsafe {
-            libc::write(
-                fd,
-                [0_u8; Self::MAPPED_BYTES].as_ptr().cast(),
-                Self::MAPPED_BYTES,
-            )
-        };
+        syscall!(write(
+            fd,
+            [0_u8; Self::MAPPED_BYTES].as_ptr().cast(),
+            Self::MAPPED_BYTES,
+        ));
 
         let mapped_addr = unsafe {
             libc::mmap(
@@ -44,19 +38,14 @@ impl MmapDb {
             panic!("{}", std::io::Error::last_os_error());
         }
         // mmap成功后就可以关闭fd，关闭fd不会影响mmap
-        unsafe {
-            libc::close(fd);
-        }
+        syscall!(close(fd));
         Self { mapped_addr }
     }
 }
 
 impl Drop for MmapDb {
     fn drop(&mut self) {
-        let ret = unsafe { libc::munmap(self.mapped_addr, Self::MAPPED_BYTES) };
-        if ret == -1 {
-            panic!("{}", std::io::Error::last_os_error());
-        }
+        syscall!(munmap(self.mapped_addr, Self::MAPPED_BYTES));
     }
 }
 

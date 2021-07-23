@@ -2,10 +2,10 @@
 # id (GNU coreutils)
 
 ## How to get calling process uid/gid?
-libc::getuid() and libc::getgid()
+`libc::getuid()` and `libc::getgid()`
 
-## how to find_uid_by_username?
-libc::getpwnam(), libc::getpwnam_r() need to input user's password
+## how to find uid by username?
+`libc::getpwnam()`, `libc::getpwnam_r()` need to input user's password
 reference: <https://stackoverflow.com/questions/39157675/how-to-get-linux-user-id-by-user-name>
 
 ## how to list/traverse all username
