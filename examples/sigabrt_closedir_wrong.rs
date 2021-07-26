@@ -35,11 +35,11 @@ dirp = std::ptr::null_mut();
 
 例如错误递归或循环间隐式的free同一个资源，程序会被valgrind检查出`closedir InvalidFree`
 
-但是进程却能正常退出，如果加上 current_dir 的函数调用程序则 SIGABRT
+但是进程却能正常退出，如果加上 `current_dir` 的函数调用程序则 SIGABRT
 
 原因是 操作系统/进程 并不会立即回收内存，更像是异步的回收内存，在回收/申请堆内存时才会检查并报错 SIGABRT
 
-而 Rust 的 current_dir 就像 Future::poll 去申请内存(因为文件绝对路径可能很长，需要扩容)
+而 Rust 的 `current_dir` 就像 `Future::poll` 去申请内存(因为文件绝对路径可能很长，需要扩容)
 
 Rust 申请内存时发现当前进程居然有几块 double free 的内存，为了避免错误进一步扩散，就报错 SIGABRT
 */
@@ -86,7 +86,7 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
         linux_commands_rewritten_in_rust::syscall!(lstat(filename_cstr, &mut stat_buf));
         let is_dir = stat_buf.st_mode & libc::S_IFMT == libc::S_IFDIR;
 
-        // convert filename from [c_char; 256] to String
+        // convert filename from [c_char; NAME_MAX] to String
         let filename_len = libc::strlen(filename_cstr);
         let filename_bytes =
             &*(&dir_entry.d_name[..filename_len] as *const [libc::c_char] as *const [u8]);

@@ -73,10 +73,14 @@ TODO
     clippy::cast_possible_truncation
 )]
 
+// cargo clippy --examples -- -Wclippy::pedantic -Aclippy::doc_markdown
 #[cfg(test)]
 pub mod database;
 pub mod dylibs_binding;
 pub mod errno;
-pub mod file_system;
 mod macros;
+pub mod network;
 pub mod time;
+
+// #include <linux/limits.h>
+pub const NAME_MAX: usize = 256;

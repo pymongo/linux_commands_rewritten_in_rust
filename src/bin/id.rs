@@ -1,6 +1,4 @@
 /*!
-# id (GNU coreutils)
-
 ## How to get calling process uid/gid?
 `libc::getuid()` and `libc::getgid()`
 
@@ -19,7 +17,6 @@ loop {
 }
 ```
 */
-#![warn(clippy::nursery, clippy::pedantic)]
 use linux_commands_rewritten_in_rust::errno::{last_errno, last_errno_message};
 
 /// current  output:

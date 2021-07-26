@@ -1,5 +1,3 @@
-#![warn(clippy::nursery, clippy::pedantic)]
-
 /**
 run 100 tims calc mean run time: perf stat -r 100 ./target/debug/tree
 */
@@ -27,8 +25,6 @@ fn main() {
     }
 }
 
-const NAME_MAX: usize = 255;
-
 unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
     loop {
         let dir_entry = libc::readdir(dirp);
@@ -51,11 +47,11 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
         linux_commands_rewritten_in_rust::syscall!(lstat(filename_cstr, &mut stat_buf));
         let is_dir = (stat_buf.st_mode & libc::S_IFMT) == libc::S_IFDIR;
 
-        // convert filename from [c_char; 256] to String
+        // convert filename from [c_char; NAME_MAX] to String
         let filename_string = String::from_raw_parts(
             (filename_cstr as *mut i8).cast(),
             libc::strlen(filename_cstr),
-            NAME_MAX,
+            linux_commands_rewritten_in_rust::NAME_MAX,
         );
         println!(
             "{}{}{}",

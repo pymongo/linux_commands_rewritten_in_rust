@@ -1,18 +1,15 @@
-#![warn(clippy::nursery, clippy::pedantic)]
+use linux_commands_rewritten_in_rust::syscall;
 
 fn main() {
-    unsafe {
-        main_();
-    }
-}
-
-unsafe fn main_() {
-    let mut uname = std::mem::zeroed();
-    assert_eq!(libc::uname(&mut uname), 0);
-    libc::printf("sysname=%s\n\0".as_ptr().cast(), uname.sysname);
-    libc::printf("nodename(hostname)=%s\n\0".as_ptr().cast(), uname.nodename);
-    libc::printf("release=%s\n\0".as_ptr().cast(), uname.release);
+    let mut uname = unsafe { std::mem::zeroed() };
+    syscall!(uname(&mut uname));
+    syscall!(printf("sysname=%s\n\0".as_ptr().cast(), uname.sysname));
+    syscall!(printf(
+        "nodename(hostname)=%s\n\0".as_ptr().cast(),
+        uname.nodename
+    ));
+    syscall!(printf("release=%s\n\0".as_ptr().cast(), uname.release));
     // The version contains the date that kernel is compile
-    libc::printf("version=%s\n\0".as_ptr().cast(), uname.version);
-    libc::printf("machine=%s\n\0".as_ptr().cast(), uname.machine);
+    syscall!(printf("version=%s\n\0".as_ptr().cast(), uname.version));
+    syscall!(printf("machine=%s\n\0".as_ptr().cast(), uname.machine));
 }

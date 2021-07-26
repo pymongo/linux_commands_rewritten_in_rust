@@ -100,11 +100,10 @@ unsafe fn read_errno() {
     );
     libc::perror(std::ptr::null());
     assert!(!f.is_null());
-    // let mut line_buf_len = 256;
     let mut line_buf = [0_u8; 256];
     loop {
         // my libc::getline usage is not working
-        let nread = libc::fgets(line_buf.as_mut_ptr().cast(), 256, f);
+        let nread = libc::fgets(line_buf.as_mut_ptr().cast(), line_buf.len() as i32, f);
         if nread.is_null() {
             libc::perror(std::ptr::null());
             break;

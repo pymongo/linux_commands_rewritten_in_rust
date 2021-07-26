@@ -1,4 +1,3 @@
-#![warn(clippy::nursery, clippy::pedantic)]
 use linux_commands_rewritten_in_rust::syscall;
 
 fn main() {
