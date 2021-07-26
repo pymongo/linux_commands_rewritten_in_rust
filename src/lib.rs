@@ -84,3 +84,5 @@ pub mod time;
 
 // #include <linux/limits.h>
 pub const NAME_MAX: usize = 256;
+pub const SOCKADDR_IN_LEN: libc::socklen_t =
+    std::mem::size_of::<libc::sockaddr_in>() as libc::socklen_t;

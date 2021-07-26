@@ -90,3 +90,54 @@ fn test_dns_lookup_gethostbyname() {
         dbg!(in_addr_to_string(addr));
     }
 }
+
+/// icmphdr.type usually use ICMP_ECHO
+pub const ICMP_ECHO: u8 = 8;
+
+#[repr(C)]
+pub struct icmphdr {
+    pub type_: u8,
+    pub code: u8,
+    pub checksum: u16,
+    pub un: un,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub union un {
+    echo: echo,
+    gateway: u32,
+    frag: frag,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct echo {
+    pub id: u16,
+    pub sequence: u16,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct frag {
+    __glibc_reserved: u16,
+    mtu: u16,
+}
+
+/// rfc792
+#[must_use]
+pub fn icmq_checksum(bytes: &[u8]) -> u16 {
+    let mut sum = 0_u32;
+    // skip type(u8) and code(u8) filed, because checksum initial value is 0, doesn't need to skip checksum field
+    bytes.chunks_exact(2).skip(1).for_each(|buf| {
+        sum += u32::from(u16::from_be_bytes(
+            std::convert::TryInto::try_into(buf).unwrap(),
+        ));
+    });
+
+    // sum = sum的高16位 + sum的低16位
+    // 如果溢出(sum的高16位不为0)则继续，我这里偷懒了
+    sum = (sum >> 16) + (sum & 0xffff);
+
+    !sum as u16
+}
