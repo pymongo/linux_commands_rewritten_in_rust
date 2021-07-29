@@ -36,7 +36,12 @@ fn dns_lookup_getaddrinfo(hostname: &str) {
     unsafe {
         // ret: Vec<addrinfo>
         let mut ret = std::ptr::null_mut();
-        libc::getaddrinfo(host.as_ptr(), std::ptr::null(), std::ptr::null(), &mut ret);
+        crate::syscall!(getaddrinfo(
+            host.as_ptr(),
+            std::ptr::null(),
+            std::ptr::null(),
+            &mut ret
+        ));
         let sockaddr = *((*ret).ai_addr);
         let mut ipv4 = [0_u8; 4];
         #[allow(clippy::transmute_ptr_to_ptr)]
@@ -52,43 +57,41 @@ fn test_dns_lookup_getaddrinfo() {
 }
 
 #[must_use]
-pub fn in_addr_to_string(in_addr: libc::in_addr) -> String {
-    unsafe {
-        std::ffi::CString::from_raw(libc::strdup(inet_ntoa(in_addr)))
-            .to_str()
-            .unwrap()
-            .to_string()
-    }
-}
-
-#[must_use]
-pub fn dns_lookup_gethostbyname(hostname: &str) -> Vec<libc::in_addr> {
-    let host = std::ffi::CString::new(hostname).unwrap();
-    let hostents = unsafe { gethostbyname(host.as_ptr().cast()) };
-    if hostents.is_null() {
+pub fn dns_resolve(hostname: &str) -> libc::in_addr {
+    let hostname_cstring = std::ffi::CString::new(hostname).unwrap();
+    let hostent = unsafe { gethostbyname(hostname_cstring.as_ptr().cast()) };
+    if hostent.is_null() {
         panic!("Invalid hostname");
     }
-    let mut in_addr_list = vec![];
-    let mut addr_bytes_list = unsafe { *hostents }.h_addr_list;
-    while !addr_bytes_list.is_null() {
-        #[allow(clippy::cast_ptr_alignment)]
-        let in_addr_ptr = unsafe { (*addr_bytes_list).cast::<libc::in_addr>() };
-        if in_addr_ptr.is_null() {
+    let h_name = unsafe { (*hostent).h_name };
+    let h_name_len = unsafe { libc::strlen(h_name) };
+    let hostname_alias = unsafe { String::from_raw_parts(h_name.cast(), h_name_len, h_name_len) };
+    println!("{} is an alias for {}", hostname_alias, hostname);
+    let mut h_addr_list = unsafe { *hostent }.h_addr_list;
+    let mut ipv4_addr_list = vec![];
+    while !h_addr_list.is_null() {
+        // let _in_addr_ptr = unsafe { (*h_addr_list).cast::<u32>() };
+        let ipv4_addr_ptr = unsafe { (*h_addr_list).cast::<[u8; 4]>() };
+        if ipv4_addr_ptr.is_null() {
             break;
         }
-        let in_addr = unsafe { *in_addr_ptr };
-        in_addr_list.push(in_addr);
-        addr_bytes_list = unsafe { addr_bytes_list.add(1) };
+        let ipv4_addr = unsafe { *ipv4_addr_ptr };
+        ipv4_addr_list.push(ipv4_addr);
+        println!(
+            "{} has address {}.{}.{}.{}",
+            hostname_alias, ipv4_addr[0], ipv4_addr[1], ipv4_addr[2], ipv4_addr[3]
+        );
+        h_addr_list = unsafe { h_addr_list.add(1) };
     }
-    in_addr_list
+    std::mem::forget(hostname_alias);
+    libc::in_addr {
+        s_addr: unsafe { htonl(u32::from_be_bytes(ipv4_addr_list[0])) },
+    }
 }
 
 #[test]
-fn test_dns_lookup_gethostbyname() {
-    let addr_list = dns_lookup_gethostbyname("www.rust-lang.org");
-    for addr in addr_list {
-        dbg!(in_addr_to_string(addr));
-    }
+fn test_dns_resolve() {
+    let _ = dns_resolve("www.rust-lang.org");
 }
 
 /// icmphdr.type usually use ICMP_ECHO
@@ -129,9 +132,9 @@ pub struct frag {
 pub fn icmq_checksum(bytes: &[u8]) -> u16 {
     let mut sum = 0_u32;
     // skip type(u8) and code(u8) filed, because checksum initial value is 0, doesn't need to skip checksum field
-    bytes.chunks_exact(2).skip(1).for_each(|buf| {
+    bytes.chunks_exact(2).skip(1).for_each(|u16_bytes| {
         sum += u32::from(u16::from_be_bytes(
-            std::convert::TryInto::try_into(buf).unwrap(),
+            std::convert::TryInto::try_into(u16_bytes).unwrap(),
         ));
     });
 

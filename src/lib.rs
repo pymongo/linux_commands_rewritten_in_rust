@@ -73,7 +73,6 @@ TODO
     clippy::cast_possible_truncation
 )]
 
-// cargo clippy --examples -- -Wclippy::pedantic -Aclippy::doc_markdown
 #[cfg(test)]
 pub mod database;
 pub mod dylibs_binding;

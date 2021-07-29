@@ -1,2 +1,6 @@
 [build]
 rustflags=["-Zinstrument-mcount"]
+
+[alias]
+test_clippy = ["clippy", "--tests", "--", "-Wclippy::pedantic", "-Aclippy::doc_markdown", "-Aclippy::cast-possible-truncation", "-Aclippy::cast-possible-wrap"]
+example_clippy = ["clippy", "--examples", "--", "-Wclippy::pedantic", "-Aclippy::doc_markdown", "-Aclippy::cast-possible-truncation", "-Aclippy::cast-possible-wrap"]

@@ -1,6 +1,4 @@
-use linux_commands_rewritten_in_rust::network::{
-    dns_lookup_gethostbyname, icmphdr, icmq_checksum, ICMP_ECHO,
-};
+use linux_commands_rewritten_in_rust::network::{dns_resolve, icmphdr, icmq_checksum, ICMP_ECHO};
 use linux_commands_rewritten_in_rust::{syscall, SOCKADDR_IN_LEN};
 
 const PACKET_LEN: usize = 64;
@@ -15,18 +13,17 @@ struct Packet {
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();
     if args.len() != 2 {
-        eprintln!("stat: missing operand");
-        eprintln!("Try 'ping --help' for more information.");
-        return;
+        eprintln!("ping: missing operand");
+        unsafe { libc::exit(libc::EXIT_FAILURE) };
     }
 
     let hostname = args[1].as_str();
     println!("{}", hostname);
-    let addr_list = dns_lookup_gethostbyname(hostname);
+    let addr = dns_resolve(hostname);
     let remote_addr = libc::sockaddr_in {
         sin_family: libc::AF_INET as libc::sa_family_t,
         sin_port: 0,
-        sin_addr: addr_list[0],
+        sin_addr: addr,
         sin_zero: unsafe { std::mem::zeroed() },
     };
 

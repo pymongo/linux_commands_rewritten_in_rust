@@ -98,22 +98,37 @@ unsafe fn read_errno() {
         "/usr/include/asm-generic/errno-base.h\0".as_ptr().cast(),
         "r\0".as_ptr().cast(),
     );
-    libc::perror(std::ptr::null());
-    assert!(!f.is_null());
     let mut line_buf = [0_u8; 256];
     loop {
-        // my libc::getline usage is not working
-        let nread = libc::fgets(line_buf.as_mut_ptr().cast(), line_buf.len() as i32, f);
-        if nread.is_null() {
-            libc::perror(std::ptr::null());
+        let line = libc::fgets(line_buf.as_mut_ptr().cast(), line_buf.len() as i32, f);
+        if line.is_null() {
             break;
         }
-        libc::printf("%s\0".as_ptr().cast(), line_buf.as_ptr());
+        // #define   ENOENT           2      /* No such file or directory */
+        let mut error_name = [0_u8; 12];
+        let mut error_number = 0_u32;
+        let mut error_message = [0_u8; 128];
+        let modified_count = libc::sscanf(
+            line,
+            "#define %s %u /* %[^,*]\0".as_ptr().cast(),
+            &mut error_name,
+            &mut error_number,
+            &mut error_message,
+        );
+        if modified_count == 3 {
+            libc::printf(
+                "error_name=%s, error_number=%u, error_message=%s\n\0"
+                    .as_ptr()
+                    .cast(),
+                &error_name,
+                error_number,
+                &error_message,
+            );
+        }
     }
     //libc::fscanf(stream, format)
 }
 
-/// Work In Progress
 #[test]
 fn test_read_errno() {
     unsafe {
