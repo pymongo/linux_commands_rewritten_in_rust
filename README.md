@@ -1,3 +1,15 @@
+# Linux commands rewritten in Rust
+
+## project structure
+
+- src/bin: Linux commands
+- src/database: like sqlx project, include database adapters eg. MySQL
+- src/dylibs_binding: Rust binding for eg. libmysqlclient.so, libsqlite3.so
+- src/network: network API which libc doesn't include, eg. inet_aton, gethostbyname
+- src/time: time API which libc doesn't include, eg. strftime, strptime
+- examples: C/C++/Rust SIGABRT/SIGSEGV bad examples and how to fix tips
+- docs: documents or notes called by eg. `#![doc = include_str!("README.md”)]`
+
 ## cargo test must run in **single thread**
 
 To run database test you need to copy config file and edit it(eg. your mysql password):
@@ -14,9 +26,10 @@ or
 
 > cargo test -- --test-threads=1
 
-## known issue on nightly-armv7-unknown-linux-gnueabihf
+## known bugs on target armv7-unknown-linux-gnueabihf
 
 - database::adapters::dbm  may double-free or malloc corrupted
 
 ## reference:
 - <https://gitlab.redox-os.org/redox-os/relibc>
+- <https://zaiste.net/posts/shell-commands-rust/>

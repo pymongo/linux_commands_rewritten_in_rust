@@ -19,7 +19,7 @@ fn main() {
         libc::S_IRUSR | libc::S_IWUSR,
     ));
     let mmap_len = LEN * SIZE;
-    // How to Fix: libc::write(fd, [0_u8; 10].as_ptr().cast(), 10);
+    // How to Fix: libc::write(fd, [0_u8; 10].as_ptr().cast(), 10); or set MAP_ANONYMOUS flag
     let mapped_addr = unsafe {
         libc::mmap(
             std::ptr::null_mut::<libc::c_void>(),

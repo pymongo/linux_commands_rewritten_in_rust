@@ -2,5 +2,6 @@
 rustflags=["-Zinstrument-mcount"]
 
 [alias]
+check_x86_32 = "check --tests --target=i686-unknown-linux-gnu"
 test_clippy = ["clippy", "--tests", "--", "-Wclippy::pedantic", "-Aclippy::doc_markdown", "-Aclippy::cast-possible-truncation", "-Aclippy::cast-possible-wrap"]
 example_clippy = ["clippy", "--examples", "--", "-Wclippy::pedantic", "-Aclippy::doc_markdown", "-Aclippy::cast-possible-truncation", "-Aclippy::cast-possible-wrap"]

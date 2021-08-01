@@ -6,10 +6,11 @@ extern "C" {
 
 #[test]
 fn test_sqlite3_libversion() {
-    unsafe {
-        libc::printf(
-            "sqlite3_libversion() = %s\n\0".as_ptr().cast(),
-            sqlite3_libversion(),
-        );
-    }
+    // copy version_str from libsqlite3.so
+    let sqlite3_version = unsafe {
+        std::ffi::CStr::from_ptr(sqlite3_libversion())
+            .to_str()
+            .unwrap()
+    };
+    dbg!(sqlite3_version);
 }

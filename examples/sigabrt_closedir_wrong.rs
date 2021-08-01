@@ -25,7 +25,7 @@ dirp = std::ptr::null_mut();
 
 ## double free 不一定及时报错
 
-《 Beginning Linux Programm 4th edition 》 Page 260 有详细介绍(PDF 293页):
+*Beginning Linux Programm 4th edition* Page 260 有详细介绍(PDF 293页):
 
 > allocated memory is writing beyond the end of an allocated block(one example is double-free)
 

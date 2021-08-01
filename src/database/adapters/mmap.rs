@@ -10,26 +10,19 @@ impl MmapDb {
         <Self as CrudUserDao>::Model::LEN * <Self as CrudUserDao>::Model::SIZE;
     #[cfg(test)]
     fn new() -> Self {
-        let fd = syscall!(open(
-            Self::DB_FILENAME,
-            libc::O_RDWR | libc::O_CREAT,
-            libc::S_IRUSR | libc::S_IWUSR,
-        ));
+        // let fd = syscall!(open(Self::DB_FILENAME, libc::O_RDWR | libc::O_CREAT, libc::S_IRUSR | libc::S_IWUSR,));
         // insert bytes to file to fit the mapped_len required
-        syscall!(write(
-            fd,
-            [0_u8; Self::MAPPED_BYTES].as_ptr().cast(),
-            Self::MAPPED_BYTES,
-        ));
+        // syscall!(write(fd, [0_u8; Self::MAPPED_BYTES].as_ptr().cast(), Self::MAPPED_BYTES));
 
         let mapped_addr = unsafe {
             libc::mmap(
                 std::ptr::null_mut(),
                 Self::MAPPED_BYTES,
                 libc::PROT_READ | libc::PROT_WRITE,
-                // The segment changes are made in the file
-                libc::MAP_SHARED,
-                fd,
+                // MAP_SHARED: The segment changes are made in the file
+                // MAP_ANONYMOUS: not map from file, would init region to zero and ignore fd and offset arg
+                libc::MAP_SHARED | libc::MAP_ANONYMOUS,
+                -1,
                 0,
             )
         };
@@ -38,7 +31,7 @@ impl MmapDb {
             panic!("{}", std::io::Error::last_os_error());
         }
         // mmap成功后就可以关闭fd，关闭fd不会影响mmap
-        syscall!(close(fd));
+        // syscall!(close(fd));
         Self { mapped_addr }
     }
 }

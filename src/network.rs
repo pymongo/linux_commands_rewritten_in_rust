@@ -8,7 +8,6 @@ MariaDB [test]> select inet_aton("192.168.1.1");
 +--------------------------+
 |               3232235777 |
 +--------------------------+
-MariaDB [test]> select inet_ntoa(3232235777);
 ```
 */
 #[link(name = "c")]

@@ -49,7 +49,7 @@ fn my_stat(filename: &str) {
 /**
 ## 「重要」Unix文件类型
 
-markdown table generate from csv by: https://donatstudios.com/CsvToMarkdownTable
+markdown table generate from csv by: <https://donatstudios.com/CsvToMarkdownTable>
 
 | stat.h   | file_type        | find -type/ls-l(first char) | bash test | example                     | $LS_COLORS |
 |----------|------------------|-----------------------------|-----------|-----------------------------|------------|

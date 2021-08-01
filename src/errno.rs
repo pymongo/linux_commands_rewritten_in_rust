@@ -10,7 +10,7 @@
 8. 后来发现很多linux底层库都用last_os_error()处理系统调用失败的情况
 
 ## errno文档解读
-https://man7.org/linux/man-pages/man3/errno.3.html
+<https://man7.org/linux/man-pages/man3/errno.3.html>
 
 > system calls and some library functions in the event of an error to indicate what went wrong
 >
