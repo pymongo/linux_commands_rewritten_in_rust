@@ -77,6 +77,7 @@ TODO
 pub mod database;
 pub mod dylibs_binding;
 pub mod errno;
+pub mod file_system;
 mod macros;
 pub mod network;
 pub mod time;
