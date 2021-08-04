@@ -14,3 +14,15 @@ macro_rules! syscall {
         }
     };
 }
+
+#[macro_export]
+macro_rules! syscall_expr {
+    ($expr:expr) => {{
+        let res = unsafe { $expr };
+        if res == -1 {
+            panic!("{}", std::io::Error::last_os_error())
+        } else {
+            res
+        }
+    }};
+}
