@@ -1,6 +1,10 @@
 use linux_programming::file_system::parser::proc;
 use std::net::Ipv4Addr;
 
+/// get default router network interface's mac/physics address
+/// use `ip route` or `route` command to get(route command require net-tools package)
+/// ## Alternative
+/// find first Iface which Gateway != 0 in `/proc/net/route`
 fn main() {
     let route_default_network_interface = proc::net::route::parse_proc_net_route()
         .into_iter()

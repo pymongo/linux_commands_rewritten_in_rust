@@ -8,6 +8,7 @@ pub struct ProcNetRoute {
     pub gateway: Ipv4Addr,
 }
 
+/// if machine not connected to internet/router, all gateway is 0.0.0.0
 #[must_use]
 pub fn parse_proc_net_route() -> Vec<ProcNetRoute> {
     let mut routes = vec![];
@@ -39,4 +40,46 @@ pub fn parse_proc_net_route() -> Vec<ProcNetRoute> {
 #[test]
 fn test_parse_proc_net_route() {
     dbg!(parse_proc_net_route());
+}
+
+#[cfg(test)]
+mod parse_with_error_handling {
+    fn default_route_network_interface() -> Option<String> {
+        use std::net::Ipv4Addr;
+        for line in std::fs::read_to_string("/proc/net/route")
+            .ok()?
+            .lines()
+            .skip(1)
+        {
+            // let row = line.split('\t').collect::<Vec<_>>();
+            let row = line.split_whitespace().collect::<Vec<_>>();
+            let gateway: Ipv4Addr = u32::from_str_radix(row[2], 16)
+                .ok()?
+                .to_ne_bytes()
+                .try_into()
+                .ok()?;
+            if gateway != Ipv4Addr::UNSPECIFIED {
+                return Some(row[0].to_string());
+            }
+        }
+        None
+    }
+
+    fn mac_address() -> Option<String> {
+        Some(
+            std::fs::read_to_string(format!(
+                "/sys/class/net/{}/address",
+                default_route_network_interface()?
+            ))
+            .ok()?
+            .trim_end()
+            .to_string(),
+        )
+    }
+
+    #[test]
+    fn test_default_route_network_interface() {
+        dbg!(default_route_network_interface());
+        dbg!(mac_address());
+    }
 }
