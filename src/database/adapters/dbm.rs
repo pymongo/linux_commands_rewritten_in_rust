@@ -174,7 +174,7 @@ unsafe fn dbm_create_read_update_delete() {
     dbg!(user);
 
     // § update
-    user.username = *b"tuseday";
+    user.username = *b"tuesday";
     value_datum.dptr = user.as_mut_ptr().cast();
     assert_eq!(
         dbm_store(

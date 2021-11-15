@@ -53,7 +53,7 @@ extern "C" {
     pub fn mysql_query(connection: *mut mysql, query: *const c_char) -> c_int;
     /// returns the number of rows affected by the UPDATE, INSERT, or DELETE query
     pub fn mysql_affected_rows(connection: *mut mysql) -> my_ulonglong;
-    /// fetch all rows at a time, used in your query data total size is small(network may not imcomplete data)
+    /// fetch all rows at a time, used in your query data total size is small(network may not incomplete data)
     pub fn mysql_store_result(connection: *mut mysql) -> *mut mysql_res;
     /// get row one by one at a time, used in return data very large(large than memory limits)
     /// use_result include the header row while store result not
