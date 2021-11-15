@@ -1,4 +1,23 @@
-fn main() {}
+use linux_programming::file_system::parser::proc;
+use std::net::Ipv4Addr;
+
+fn main() {
+    let route_default_network_interface = proc::net::route::parse_proc_net_route()
+        .into_iter()
+        .find(|network_interface| {
+            network_interface.gateway != Ipv4Addr::UNSPECIFIED
+                && network_interface.destination == Ipv4Addr::UNSPECIFIED
+        })
+        .unwrap()
+        .iface;
+    assert_eq!(
+        route_default_network_interface,
+        get_default_route_network_interface_by_ip_route()
+    );
+    dbg!(get_mac_addr_by_network_interface(
+        route_default_network_interface
+    ));
+}
 
 fn get_default_route_network_interface_by_ip_route() -> String {
     let output = std::process::Command::new("ip")

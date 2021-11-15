@@ -1,3 +1,4 @@
+pub mod parser;
 pub mod syscall;
 use syscall::basename;
 
