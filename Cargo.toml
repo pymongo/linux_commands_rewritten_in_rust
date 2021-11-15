@@ -1,5 +1,5 @@
 [package]
-name = "linux_commands_rewritten_in_rust"
+name = "linux_programming"
 version = "0.1.0"
 edition = "2021"
 

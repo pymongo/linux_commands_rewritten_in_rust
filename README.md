@@ -2,9 +2,11 @@
 
 ## project structure
 
-- src/bin: Linux commands
+- src/bin: Linux commands rewritten in Rust
 - src/database: like sqlx project, include database adapters eg. MySQL
 - src/dylibs_binding: Rust binding for eg. libmysqlclient.so, libsqlite3.so
+- src/file_system: some file_system relative bindings e.g. `basename()`
+- src/file_system/parser: parse to some files e.g. `/proc/net/route` to get Linux system information from files
 - src/network: network API which libc doesn't include, eg. inet_aton, gethostbyname
 - src/time: time API which libc doesn't include, eg. strftime, strptime
 - examples: C/C++/Rust SIGABRT/SIGSEGV bad examples and how to fix tips

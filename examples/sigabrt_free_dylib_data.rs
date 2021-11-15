@@ -1,4 +1,4 @@
-use linux_commands_rewritten_in_rust::dylibs_binding::sqlite3::sqlite3_libversion;
+use linux_programming::dylibs_binding::sqlite3::sqlite3_libversion;
 
 fn main() {
     unsafe {

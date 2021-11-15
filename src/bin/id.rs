@@ -17,7 +17,7 @@ loop {
 }
 ```
 */
-use linux_commands_rewritten_in_rust::errno::{last_errno, last_errno_message};
+use linux_programming::errno::{last_errno, last_errno_message};
 
 /// current  output:
 /// expected output: uid=1000(w) gid=1001(w) groups=1001(w),998(wheel),991(lp),3(sys),90(network),98(power),1000(autologin),966(sambashare)

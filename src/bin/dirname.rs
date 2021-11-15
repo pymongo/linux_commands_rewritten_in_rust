@@ -1,4 +1,4 @@
-use linux_commands_rewritten_in_rust::file_system::dirname;
+use linux_programming::file_system::syscall::dirname;
 
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();

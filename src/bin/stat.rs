@@ -1,5 +1,5 @@
-use linux_commands_rewritten_in_rust::syscall;
-use linux_commands_rewritten_in_rust::time::format_timestamp_with_nanosecond;
+use linux_programming::syscall;
+use linux_programming::time::format_timestamp_with_nanosecond;
 
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();

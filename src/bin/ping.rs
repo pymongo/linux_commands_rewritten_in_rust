@@ -1,5 +1,5 @@
-use linux_commands_rewritten_in_rust::network::{dns_resolve, icmphdr, icmq_checksum, ICMP_ECHO};
-use linux_commands_rewritten_in_rust::{syscall, SOCKADDR_IN_LEN};
+use linux_programming::network::{dns_resolve, icmphdr, icmq_checksum, ICMP_ECHO};
+use linux_programming::{syscall, SOCKADDR_IN_LEN};
 
 const PACKET_LEN: usize = 64;
 

@@ -11,7 +11,7 @@ other better alternatives:
 1. let pwd_str_len = buf.iter().position(|&x| x == b'\0').unwrap();
 2. let pwd_str_len = unsafe { libc::strlen(buf.as_ptr().cast()) };
 */
-use linux_commands_rewritten_in_rust::{syscall, NAME_MAX};
+use linux_programming::{syscall, NAME_MAX};
 
 fn main() {
     let mut buf = [0_u8; NAME_MAX];

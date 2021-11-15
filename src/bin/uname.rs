@@ -1,4 +1,4 @@
-use linux_commands_rewritten_in_rust::syscall;
+use linux_programming::syscall;
 
 fn main() {
     let mut uname = unsafe { std::mem::zeroed() };

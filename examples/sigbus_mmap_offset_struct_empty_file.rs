@@ -8,7 +8,7 @@ access memory beyond the physically address
 #[derive(Clone, Copy)]
 #[repr(C)]
 struct Byte(u8);
-use linux_commands_rewritten_in_rust::syscall;
+use linux_programming::syscall;
 
 fn main() {
     const LEN: usize = 10;

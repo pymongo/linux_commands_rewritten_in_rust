@@ -44,14 +44,14 @@ unsafe fn traverse_dir_dfs(dirp: *mut libc::DIR, indent: usize) {
         // check file whether a directory
         let mut stat_buf = std::mem::zeroed();
         // lstat doesn't follow link
-        linux_commands_rewritten_in_rust::syscall!(lstat(filename_cstr, &mut stat_buf));
+        linux_programming::syscall!(lstat(filename_cstr, &mut stat_buf));
         let is_dir = (stat_buf.st_mode & libc::S_IFMT) == libc::S_IFDIR;
 
         // convert filename from [c_char; NAME_MAX] to String
         let filename_string = String::from_raw_parts(
             (filename_cstr as *mut i8).cast(),
             libc::strlen(filename_cstr),
-            linux_commands_rewritten_in_rust::NAME_MAX,
+            linux_programming::NAME_MAX,
         );
         println!(
             "{}{}{}",

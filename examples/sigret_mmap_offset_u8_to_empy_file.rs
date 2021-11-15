@@ -5,7 +5,7 @@
 - mmap空文件后，读取偏移为10的数据
 - unimplemented instructions
 */
-use linux_commands_rewritten_in_rust::syscall;
+use linux_programming::syscall;
 fn main() {
     const LEN: usize = 10;
     let fd = syscall!(open(

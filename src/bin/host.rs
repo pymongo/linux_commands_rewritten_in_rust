@@ -1,5 +1,5 @@
-use linux_commands_rewritten_in_rust::file_system::print_executable_usage;
-use linux_commands_rewritten_in_rust::network::dns_resolve;
+use linux_programming::file_system::print_executable_usage;
+use linux_programming::network::dns_resolve;
 
 fn main() {
     let args = std::env::args().collect::<Vec<_>>();
