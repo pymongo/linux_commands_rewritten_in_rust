@@ -35,7 +35,7 @@ This repo is cover these topics:
 
 因为FFI调用更倾向于调用方进行内存分配/回收管理，所以Rust一定就要用传入可变指针让系统调用函数把返回值写进去的方式
 
-所以同样是localtime的系统调用Rust会用localtime_r而不用localtime
+所以同样是localtime的系统调用Rust会用localtime_r,gethostbyname_r而不用localtime
 
 ---
 
@@ -52,3 +52,5 @@ This repo is cover these topics:
 - ent -> entry: dirent.h, ENOENT(error no entry)
 - nam -> name: getpwnam, tmpnam
 - ppid -> parent PID
+- xxxctl -> control, eg. shmctl, 例外: fcntl 中把 control 缩写成 cntl
+- xxx_r -> re-entrant(可重入), 例如 localtime 和 localtime_r，_r 的版本多传入一个可变指针接收返回值实现可重入，而非 _r 版本返回值指向动态库的静态内存(有状态)

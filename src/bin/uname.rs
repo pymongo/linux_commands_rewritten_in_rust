@@ -12,4 +12,8 @@ fn main() {
     // The version contains the date that kernel is compile
     syscall!(printf("version=%s\n\0".as_ptr().cast(), uname.version));
     syscall!(printf("machine=%s\n\0".as_ptr().cast(), uname.machine));
+    syscall!(printf(
+        "domainname=%s\n\0".as_ptr().cast(),
+        uname.domainname
+    ));
 }

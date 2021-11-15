@@ -13,7 +13,7 @@ process try to access memory it doesn't own
 - access memory process doesn't own, eg. index out of range
 */
 fn main() {
-    let input_filename = format!("{}/Cargo.toml\0", env!("CARGO_MANIFEST_DIR"));
+    let input_filename = concat!(env!("CARGO_MANIFEST_DIR"), "/Cargo.toml\0");
     // Bug is here: should check dirp.is_null(). if input_filename not a dir, dirp would be NULL
     let dirp = unsafe { libc::opendir(input_filename.as_ptr().cast()) };
     // How to fix: if dirp.is_null() { panic!() }

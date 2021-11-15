@@ -38,7 +38,7 @@ impl std::str::FromStr for User {
 impl User {
     pub const SIZE: usize = std::mem::size_of::<Self>();
     pub const LEN: usize = 10;
-    pub fn new(user_id: u8) -> Self {
+    pub const fn new(user_id: u8) -> Self {
         assert!(Self::user_id_is_valid(user_id));
         let mut username = *b"user_00";
         username[5] = b'0' + (user_id / 10) % 10;
