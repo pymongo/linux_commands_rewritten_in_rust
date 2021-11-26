@@ -33,5 +33,6 @@ or
 - database::adapters::dbm  may double-free or malloc corrupted
 
 ## reference:
+- [gnu core utils rewritten in Rust](https://github.com/uutils/coreutils)
 - <https://gitlab.redox-os.org/redox-os/relibc>
 - <https://zaiste.net/posts/shell-commands-rust/>
