@@ -1,4 +1,4 @@
-use linux_programming::file_system::parser::proc;
+use linux_programming::{file_system::parser::proc, syscall};
 use std::net::Ipv4Addr;
 
 /// get default router network interface's mac/physics address
@@ -6,14 +6,7 @@ use std::net::Ipv4Addr;
 /// ## Alternative
 /// find first Iface which Gateway != 0 in `/proc/net/route`
 fn main() {
-    let route_default_network_interface = proc::net::route::parse_proc_net_route()
-        .into_iter()
-        .find(|network_interface| {
-            network_interface.gateway != Ipv4Addr::UNSPECIFIED
-                && network_interface.destination == Ipv4Addr::UNSPECIFIED
-        })
-        .unwrap()
-        .iface;
+    let route_default_network_interface = proc::net::route::default_route_network_interface();
     assert_eq!(
         route_default_network_interface,
         get_default_route_network_interface_by_ip_route()
@@ -44,4 +37,22 @@ fn get_mac_addr_by_network_interface(network_interface: String) -> String {
         .unwrap_or_default()
         .trim_end()
         .to_string()
+}
+
+unsafe fn get_default_route_ip() {
+    
+    let mut addrs = std::mem::zeroed();
+    syscall!(getifaddrs(&mut addrs));
+    let mut cur = addrs;
+    while !cur.is_null() {
+        let cur_ = *cur;
+        libc::printf("%s\n\0".as_ptr().cast(), cur_.ifa_name);
+        cur = cur_.ifa_next;
+    }
+    libc::freeifaddrs(addrs);
+}
+
+#[test]
+fn feature() {
+    unsafe { get_default_route_ip() ; }
 }

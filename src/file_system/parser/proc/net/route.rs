@@ -10,7 +10,7 @@ pub struct ProcNetRoute {
 
 /// if machine not connected to internet/router, all gateway is 0.0.0.0
 #[must_use]
-pub fn parse_proc_net_route() -> Vec<ProcNetRoute> {
+fn parse_proc_net_route() -> Vec<ProcNetRoute> {
     let mut routes = vec![];
     for line in std::fs::read_to_string("/proc/net/route")
         .unwrap()
@@ -35,6 +35,18 @@ pub fn parse_proc_net_route() -> Vec<ProcNetRoute> {
         });
     }
     routes
+}
+
+#[must_use]
+pub fn default_route_network_interface() -> String{
+    parse_proc_net_route()
+    .into_iter()
+    .find(|network_interface| {
+        network_interface.gateway != Ipv4Addr::UNSPECIFIED
+            && network_interface.destination == Ipv4Addr::UNSPECIFIED
+    })
+    .unwrap()
+    .iface
 }
 
 #[test]
