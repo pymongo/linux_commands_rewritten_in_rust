@@ -38,15 +38,15 @@ fn parse_proc_net_route() -> Vec<ProcNetRoute> {
 }
 
 #[must_use]
-pub fn default_route_network_interface() -> String{
+pub fn default_route_network_interface() -> String {
     parse_proc_net_route()
-    .into_iter()
-    .find(|network_interface| {
-        network_interface.gateway != Ipv4Addr::UNSPECIFIED
-            && network_interface.destination == Ipv4Addr::UNSPECIFIED
-    })
-    .unwrap()
-    .iface
+        .into_iter()
+        .find(|network_interface| {
+            network_interface.gateway != Ipv4Addr::UNSPECIFIED
+                && network_interface.destination == Ipv4Addr::UNSPECIFIED
+        })
+        .unwrap()
+        .iface
 }
 
 #[test]

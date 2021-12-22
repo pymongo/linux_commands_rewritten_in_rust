@@ -40,19 +40,56 @@ fn get_mac_addr_by_network_interface(network_interface: String) -> String {
 }
 
 unsafe fn get_default_route_ip() {
-    
+    dbg!(proc::net::route::default_route_network_interface());
+    // borrowed value not live long
+    let default_route = proc::net::route::default_route_network_interface();
+
     let mut addrs = std::mem::zeroed();
+    // return first address of Vec<ifaddrs>
     syscall!(getifaddrs(&mut addrs));
     let mut cur = addrs;
     while !cur.is_null() {
-        let cur_ = *cur;
-        libc::printf("%s\n\0".as_ptr().cast(), cur_.ifa_name);
-        cur = cur_.ifa_next;
+        let cur_deref = *cur;
+        if cur_deref.ifa_addr.is_null() {
+            cur = cur_deref.ifa_next;
+            continue;
+        }
+        // sa_family is oneof AF_PACKET, AF_INET, AF_INET6
+        if (*cur_deref.ifa_addr).sa_family != libc::AF_INET as u16 {
+            cur = cur_deref.ifa_next;
+            continue;
+        }
+
+        if libc::strcmp(cur_deref.ifa_name, default_route.as_ptr().cast()) == 0 {
+            let addr = *cur_deref.ifa_addr.cast::<libc::sockaddr_in>();
+            dbg!(std::net::Ipv4Addr::from(addr.sin_addr.s_addr.to_ne_bytes()));
+            dbg!(addr.sin_addr.s_addr);
+            dbg!(addr.sin_port);
+        }
+        cur = cur_deref.ifa_next;
     }
     libc::freeifaddrs(addrs);
 }
 
 #[test]
 fn feature() {
-    unsafe { get_default_route_ip() ; }
+    unsafe {
+        get_default_route_ip();
+    }
+}
+
+#[test]
+fn a2() {
+    let default_route = proc::net::route::default_route_network_interface();
+
+    unsafe {
+        libc::printf(
+            "%s\n\0".as_ptr().cast(),
+            default_route.as_ptr().cast::<libc::c_char>(),
+        );
+        dbg!(libc::strcmp(
+            "wlp4s0\0".as_ptr().cast(),
+            "wlp4s0\0".as_ptr().cast()
+        ));
+    }
 }
