@@ -21,6 +21,8 @@ pub mod file_system;
 mod macros;
 pub mod network;
 pub mod time;
+#[cfg(test)]
+mod misc_syscall;
 
 // #include <linux/limits.h>
 pub const NAME_MAX: usize = 256;

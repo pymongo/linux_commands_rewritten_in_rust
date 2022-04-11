@@ -39,8 +39,8 @@ fn get_mac_addr_by_network_interface(network_interface: String) -> String {
         .to_string()
 }
 
-unsafe fn get_default_route_ip() {
-    dbg!(proc::net::route::default_route_network_interface());
+unsafe fn get_default_network_interface_ip() -> std::net::Ipv4Addr {
+    let mut machine_ip = std::mem::zeroed();
     // borrowed value not live long
     let default_route = proc::net::route::default_route_network_interface();
 
@@ -62,20 +62,13 @@ unsafe fn get_default_route_ip() {
 
         if libc::strcmp(cur_deref.ifa_name, default_route.as_ptr().cast()) == 0 {
             let addr = *cur_deref.ifa_addr.cast::<libc::sockaddr_in>();
-            dbg!(std::net::Ipv4Addr::from(addr.sin_addr.s_addr.to_ne_bytes()));
-            dbg!(addr.sin_addr.s_addr);
-            dbg!(addr.sin_port);
+            machine_ip = std::net::Ipv4Addr::from(addr.sin_addr.s_addr.to_ne_bytes());
+            break;
         }
         cur = cur_deref.ifa_next;
     }
     libc::freeifaddrs(addrs);
-}
-
-#[test]
-fn feature() {
-    unsafe {
-        get_default_route_ip();
-    }
+    machine_ip
 }
 
 #[test]
