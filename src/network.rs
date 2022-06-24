@@ -1,6 +1,6 @@
 use libc::{c_char, c_int, in_addr};
 
-/**
+/*
 ```text
 MariaDB [test]> select inet_aton("192.168.1.1");
 +--------------------------+
@@ -52,7 +52,7 @@ fn dns_lookup_getaddrinfo(hostname: &str) {
 
 #[test]
 fn test_dns_lookup_getaddrinfo() {
-    dns_lookup_getaddrinfo("localhost");
+    dns_lookup_getaddrinfo("baidu.com");
 }
 
 #[must_use]

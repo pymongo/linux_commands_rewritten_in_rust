@@ -1,7 +1,7 @@
 #[cfg(test)]
 use std::os::raw::c_int;
 
-/// curses/ncurses: a terminal ui facilities
+// curses/ncurses: a terminal ui facilities
 #[cfg(test)]
 #[link(name = "curses")]
 extern "C" {

@@ -1,6 +1,6 @@
 use libc::{c_char, c_int};
 
-/**
+/*
 ## dbm/gdbm: a key-value single file database facilities
 My gdbm_compat binding on crates.io: https://crates.io/crates/gdbm_compat
 

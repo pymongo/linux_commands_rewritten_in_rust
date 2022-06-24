@@ -1,6 +1,6 @@
 use libc::{c_char, c_int, c_uint};
 
-/**
+/*
 > gcc -lmysqlclient mysql_conn_example.c
 
 ```text

@@ -108,6 +108,7 @@ unsafe fn read_errno() {
         let mut error_name = [0_u8; 12];
         let mut error_number = 0_u32;
         let mut error_message = [0_u8; 128];
+        // rust alternative is text_io::scan
         let modified_count = libc::sscanf(
             line,
             "#define %s %u /* %[^,*]\0".as_ptr().cast(),

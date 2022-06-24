@@ -15,7 +15,7 @@ if libc::localtime_r(&sec, &mut out).is_null() {
 ```
 */
 
-/// [Why libc remove strftime?](https://github.com/rust-lang/libc/commit/377ee7307ae7d4b6a5fb46802958518f724ba873)
+// [Why libc remove strftime?](https://github.com/rust-lang/libc/commit/377ee7307ae7d4b6a5fb46802958518f724ba873)
 extern "C" {
     fn strftime(
         buf: *mut libc::c_char,
